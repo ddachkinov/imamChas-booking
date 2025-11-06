@@ -2,14 +2,15 @@
 
 **Last Updated:** 2025-11-06
 **Current Phase:** Phase 1 - Foundation
-**Active Task:** Authentication and tenancy backend (next)
-**Overall Progress:** 15%
+**Active Task:** Authentication and tenancy backend (in progress)
+**Overall Progress:** 20%
 
 ## Completed Tasks
 
 1. **Project initialization** - Created orchestration files (ORCHESTRATOR.md, STATUS.md, .gitignore)
 2. **Documentation organization** - Moved all docs to docs/ directory with TASKS/ subdirectory
 3. **Project setup and infrastructure** - Complete backend and frontend foundation with Docker, logging, tests
+4. **Authentication database entities** - User, Tenant, Role, Permission, and token entities
 
 ## Current Task
 
@@ -74,6 +75,41 @@
 - ✅ All changes committed and ready to push
 
 ### Project is now ready for feature development starting with authentication module.
+
+---
+
+**Task:** Authentication and tenancy backend
+**Status:** IN PROGRESS (15% complete)
+**Progress Notes:**
+
+### Completed:
+- ✅ Database entity model (8 entities created):
+  - Tenant entity with subscription management and feature flags
+  - User entity with OAuth, MFA, and multi-tenant support
+  - Role entity with hierarchical scopes (tenant, business, location)
+  - Permission entity with resource-action-scope model
+  - UserRole junction for role assignments with scope
+  - RolePermission junction for role-permission mappings
+  - PasswordResetToken entity with SHA-256 hash storage
+  - EmailVerificationToken entity with SHA-256 hash storage
+- ✅ All entities with proper TypeORM decorators, indexes, and relationships
+- ✅ Enums for type safety (UserStatus, MfaMethod, OAuthProvider, RoleScope, PermissionScope)
+- ✅ Soft delete support on tenant-level entities
+- ✅ Foundation ready for migration generation
+
+### Next Steps (see WIP.md for detailed instructions):
+1. Create auth DTOs (RegisterDto, LoginDto, PasswordResetDto, etc.)
+2. Implement PasswordService with Argon2id hashing
+3. Implement JwtService with RS256 signing (need to generate RSA keys)
+4. Implement AuthService with register, login, password reset logic
+5. Create AuthController with all endpoints
+6. Implement JWT strategy and guards for Passport
+7. Create AuthModule, UsersModule, TenantsModule
+8. Generate and run database migrations
+9. Write comprehensive unit and E2E tests
+10. Create seed data for system roles and permissions
+
+**See WIP.md for complete resume instructions with code examples**
 
 ## Next Tasks (Priority Order)
 
@@ -144,3 +180,32 @@ None currently.
 - Begin authentication and tenancy backend module
 - Implement User and Tenant entities
 - Create authentication endpoints (register, login, logout, refresh)
+
+### Session 2 Continued - Auth Entities
+**Focus:** Database entities for authentication and RBAC
+
+**Completed:**
+- Created 8 TypeORM entities for authentication system
+- Tenant entity with subscription and feature flag support
+- User entity with OAuth providers, MFA, multi-tenant isolation
+- Role-based access control entities (Role, Permission, UserRole, RolePermission)
+- Token entities for password reset and email verification
+- All entities with proper indexes and relationships
+- WIP.md created with detailed resume instructions
+
+**Database Schema Designed:**
+- Multi-tenant architecture with tenant_id on all user data
+- Unique constraints: tenant+email, tenant+role name, resource+action+scope
+- Scoped role assignments (tenant, business, location levels)
+- OAuth provider support (Google, Facebook, Apple)
+- MFA configuration (TOTP, SMS)
+- Token-based flows with SHA-256 hashed tokens
+- Soft deletes on tenant-scoped entities
+
+**Files Created:** 8 entity files
+**Commits:** 1 commit (auth entities + WIP.md)
+
+**Next Session Should:**
+- Follow WIP.md step-by-step instructions
+- Start with DTOs then services (Password, JWT, Auth)
+- Generate migrations and test with Docker PostgreSQL
