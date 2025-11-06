@@ -9,6 +9,8 @@ import { loggerConfig } from './config/logger.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
+import { BusinessesModule } from './modules/businesses/businesses.module';
+import { LocationsModule } from './modules/locations/locations.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { TenantsModule } from './modules/tenants/tenants.module';
     AuthModule,
     UsersModule,
     TenantsModule,
+    BusinessesModule,
+    LocationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
