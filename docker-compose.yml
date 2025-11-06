@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: booking-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: booking_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - booking-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: booking-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - booking-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API (optional - can run locally with npm run start:dev)
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile.dev
+  #   container_name: booking-backend
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     NODE_ENV: development
+  #     DB_HOST: postgres
+  #     DB_PORT: 5432
+  #     DB_USERNAME: postgres
+  #     DB_PASSWORD: postgres
+  #     DB_DATABASE: booking_dev
+  #     REDIS_HOST: redis
+  #     REDIS_PORT: 6379
+  #   volumes:
+  #     - ./backend:/app
+  #     - /app/node_modules
+  #   networks:
+  #     - booking-network
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  booking-network:
+    driver: bridge
