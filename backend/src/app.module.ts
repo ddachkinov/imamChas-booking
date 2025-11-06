@@ -11,6 +11,9 @@ import { UsersModule } from './modules/users/users.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
 import { BusinessesModule } from './modules/businesses/businesses.module';
 import { LocationsModule } from './modules/locations/locations.module';
+import { ServicesModule } from './modules/services/services.module';
+import { StaffModule } from './modules/staff/staff.module';
+import { ClientsModule } from './modules/clients/clients.module';
 
 @Module({
   imports: [
@@ -34,6 +37,9 @@ import { LocationsModule } from './modules/locations/locations.module';
     TenantsModule,
     BusinessesModule,
     LocationsModule,
+    ServicesModule,
+    StaffModule,
+    ClientsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
