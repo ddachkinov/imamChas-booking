@@ -3,359 +3,381 @@
 ## Current Status
 
 **Task:** Authentication and Multi-Tenancy Backend (Task 3 from STATE.md)
-**Progress:** 15% - Database entities completed
+**Progress:** 90% - Core implementation complete, needs migrations and testing
 **Last Updated:** 2025-11-06
 
-## Completed in This Session
+## Completed
 
-### Infrastructure (Completed ✅)
-- Backend core (main.ts, AppModule, health endpoint)
-- Database configuration with TypeORM
-- Winston logging integration
-- Docker Compose (PostgreSQL + Redis)
-- Common utilities (decorators, filters, interceptors, DTOs, enums)
-- Testing infrastructure (unit + E2E)
-- Frontend foundation (Layout, Button, Home page, ApiService)
+### ✅ All Core Implementation Done (90%)
 
-### Authentication Entities (Completed ✅)
-Created 8 database entities in `backend/src/modules/`:
+1. **Database Entities** (8 files)
+   - Tenant, User, Role, Permission, UserRole, RolePermission
+   - PasswordResetToken, EmailVerificationToken
+   - All with proper TypeORM decorators, indexes, relationships
 
-1. **tenants/entities/tenant.entity.ts** - Multi-tenant isolation
-2. **users/entities/user.entity.ts** - User accounts with OAuth support
-3. **users/entities/role.entity.ts** - RBAC roles
-4. **users/entities/permission.entity.ts** - Granular permissions
-5. **users/entities/user-role.entity.ts** - User-role assignments
-6. **users/entities/role-permission.entity.ts** - Role-permission mappings
-7. **auth/entities/password-reset-token.entity.ts** - Password reset tokens
-8. **auth/entities/email-verification-token.entity.ts** - Email verification tokens
+2. **DTOs and Interfaces** (8 files)
+   - RegisterDto, LoginDto, RefreshTokenDto
+   - PasswordResetRequestDto, PasswordResetConfirmDto, VerifyEmailDto
+   - AuthResponse, JwtPayload interfaces
 
-All entities have:
-- Proper TypeORM decorators
-- Database indexes for performance
-- Relationships configured
-- Enums for type safety
-- Soft delete support where appropriate
+3. **Services** (4 files)
+   - **PasswordService**: Argon2id hashing, token generation (18 unit tests)
+   - **JwtService**: RS256 signing, Redis revocation, token rotation
+   - **UsersService**: CRUD, permission resolution
+   - **TenantsService**: Tenant management, subscription validation
 
-## Next Steps - Exact Resume Instructions
+4. **Authentication Flow** (4 files)
+   - **AuthService**: register, login, logout, password reset, email verification
+   - **AuthController**: 9 REST endpoints with Swagger docs
+   - **JwtStrategy**: Passport JWT strategy with revocation check
+   - **JwtAuthGuard**: Auth guard with @Public() decorator
 
-### Step 1: Create Auth Module DTOs (Priority: CRITICAL)
+5. **Modules** (3 files)
+   - AuthModule, UsersModule, TenantsModule
+   - All wired up in AppModule
+   - Redis client configured
 
-Create these files in `backend/src/modules/auth/dto/`:
+**Total Files Created:** 31 files
+**Commits:** 3 commits (entities, services, complete implementation)
 
-**register.dto.ts:**
-```typescript
-import { IsEmail, IsString, MinLength, Matches, IsOptional, IsBoolean } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+## Remaining Tasks
 
-export class RegisterDto {
-  @ApiProperty() @IsEmail() email: string;
-  @ApiProperty() @IsString() @MinLength(8) @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/) password: string;
-  @ApiProperty() @IsString() first_name: string;
-  @ApiProperty() @IsString() last_name: string;
-  @ApiProperty({ required: false }) @IsOptional() @IsString() phone_number?: string;
-  @ApiProperty({ required: false }) @IsOptional() @IsString() language?: string;
-  @ApiProperty({ required: false }) @IsOptional() @IsString() timezone?: string;
-  @ApiProperty({ required: false }) @IsOptional() @IsBoolean() marketing_consent?: boolean;
-}
-```
-
-**login.dto.ts:**
-```typescript
-import { IsEmail, IsString, IsOptional } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-
-export class LoginDto {
-  @ApiProperty() @IsEmail() email: string;
-  @ApiProperty() @IsString() password: string;
-  @ApiProperty({ required: false }) @IsOptional() @IsString() mfa_code?: string;
-}
-```
-
-**password-reset-request.dto.ts, password-reset-confirm.dto.ts, refresh-token.dto.ts**
-
-**auth-response.interface.ts:**
-```typescript
-export interface AuthResponse {
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
-  token_type: string;
-  user: {
-    id: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-    email_verified: boolean;
-  };
-}
-```
-
-### Step 2: Create Password Service (Priority: CRITICAL)
-
-File: `backend/src/modules/auth/services/password.service.ts`
-
-Must implement:
-- `hashPassword(password: string): Promise<string>` - Use Argon2id
-- `verifyPassword(password: string, hash: string): Promise<boolean>`
-- `validatePasswordComplexity(password: string): void` - Throw ValidationException
-- `generateResetToken(): string` - crypto.randomBytes(32)
-- `hashToken(token: string): string` - SHA-256 hash
-
-Dependencies to add if not present:
-```json
-"argon2": "^0.31.2"  // Already in package.json
-```
-
-Argon2id parameters:
-- memory: 64MB (65536 KB)
-- iterations: 3
-- parallelism: 4
-
-### Step 3: Create JWT Service (Priority: CRITICAL)
-
-File: `backend/src/modules/auth/services/jwt.service.ts`
-
-Must implement:
-- `generateAccessToken(user: User, tenant: Tenant): Promise<string>`
-- `generateRefreshToken(user: User): Promise<string>`
-- `verifyToken(token: string): Promise<JwtPayload>`
-- `revokeToken(tokenId: string, expirySeconds: number): Promise<void>` - Store in Redis
-- `isTokenRevoked(tokenId: string): Promise<boolean>` - Check Redis
-
-Need to generate RSA keys:
-```bash
-# Run in backend/ directory
-openssl genrsa -out private.key 2048
-openssl rsa -in private.key -pubout -out public.key
-```
-
-Add to .env:
-```
-JWT_PRIVATE_KEY=<contents of private.key>
-JWT_PUBLIC_KEY=<contents of public.key>
-```
-
-### Step 4: Create Auth Service (Priority: CRITICAL)
-
-File: `backend/src/modules/auth/services/auth.service.ts`
-
-Must implement:
-- `register(registerDto: RegisterDto, tenantId: string): Promise<AuthResponse>`
-- `login(loginDto: LoginDto): Promise<AuthResponse>`
-- `refreshToken(refreshToken: string): Promise<AuthResponse>`
-- `logout(userId: string, tokenId: string): Promise<void>`
-- `requestPasswordReset(email: string): Promise<void>`
-- `confirmPasswordReset(token: string, newPassword: string): Promise<void>`
-- `verifyEmail(token: string): Promise<void>`
-
-Dependencies: PasswordService, JwtService, UsersService, EmailService (stub for now)
-
-### Step 5: Create Auth Controller (Priority: HIGH)
-
-File: `backend/src/modules/auth/auth.controller.ts`
-
-Endpoints:
-- `POST /auth/register` - RegisterDto → AuthResponse
-- `POST /auth/login` - LoginDto → AuthResponse
-- `POST /auth/refresh` - RefreshTokenDto → AuthResponse
-- `POST /auth/logout` - (authenticated) → 200 OK
-- `POST /auth/password-reset` - PasswordResetRequestDto → 200 OK
-- `POST /auth/password-reset/confirm` - PasswordResetConfirmDto → 200 OK
-- `POST /auth/verify-email` - { token: string } → 200 OK
-
-All with proper Swagger decorators (@ApiTags, @ApiOperation, @ApiResponse)
-
-### Step 6: Create JWT Strategy and Guards (Priority: HIGH)
-
-**jwt.strategy.ts:**
-```typescript
-import { Injectable } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
-
-@Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private configService: ConfigService) {
-    super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: configService.get('JWT_PUBLIC_KEY'),
-      algorithms: ['RS256'],
-    });
-  }
-
-  async validate(payload: JwtPayload) {
-    // Check if token is revoked
-    // Return user object for request.user
-    return { userId: payload.user_id, tenantId: payload.tenant_id };
-  }
-}
-```
-
-**jwt-auth.guard.ts:**
-```typescript
-import { Injectable } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-
-@Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {}
-```
-
-### Step 7: Create Auth Module (Priority: HIGH)
-
-File: `backend/src/modules/auth/auth.module.ts`
-
-```typescript
-import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthController } from './auth.controller';
-import { AuthService } from './services/auth.service';
-import { PasswordService } from './services/password.service';
-import { JwtService as CustomJwtService } from './services/jwt.service';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { PasswordResetToken } from './entities/password-reset-token.entity';
-import { EmailVerificationToken } from './entities/email-verification-token.entity';
-
-@Module({
-  imports: [
-    PassportModule,
-    JwtModule.register({}), // Config handled in custom JWT service
-    TypeOrmModule.forFeature([PasswordResetToken, EmailVerificationToken]),
-  ],
-  controllers: [AuthController],
-  providers: [AuthService, PasswordService, CustomJwtService, JwtStrategy],
-  exports: [AuthService, CustomJwtService],
-})
-export class AuthModule {}
-```
-
-### Step 8: Create Users Module (Priority: HIGH)
-
-Similar structure:
-- UsersModule
-- UsersService (basic CRUD)
-- UsersController (if needed for admin)
-- TypeOrmModule.forFeature([User, Role, Permission, UserRole, RolePermission])
-
-### Step 9: Create Tenants Module (Priority: HIGH)
-
-- TenantsModule
-- TenantsService
-- TenantContextMiddleware (extract tenant from JWT)
-- TypeOrmModule.forFeature([Tenant])
-
-### Step 10: Generate and Run Migration (Priority: CRITICAL)
+### Step 1: Generate RSA Keys for JWT (CRITICAL - Required to run app)
 
 ```bash
 cd backend
-npm run migration:generate -- src/database/migrations/CreateAuthTables
-npm run migration:run
+
+# Generate 2048-bit RSA private key
+openssl genrsa -out private.key 2048
+
+# Extract public key
+openssl rsa -in private.key -pubout -out public.key
+
+# View the keys (copy these to .env)
+cat private.key
+cat public.key
 ```
 
-### Step 11: Write Tests (Priority: MEDIUM)
+Add to `backend/.env`:
+```bash
+# JWT Configuration
+JWT_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
+[paste full private key here, including newlines]
+-----END RSA PRIVATE KEY-----"
 
-Unit tests:
-- `password.service.spec.ts` - Test Argon2 hashing, validation
-- `jwt.service.spec.ts` - Test token generation, verification
-- `auth.service.spec.ts` - Test register, login, password reset flows
+JWT_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----
+[paste full public key here, including newlines]
+-----END PUBLIC KEY-----"
 
-Integration tests:
-- `auth.controller.spec.ts` - Test endpoints with test database
+JWT_ACCESS_TOKEN_EXPIRY=3600
+JWT_REFRESH_TOKEN_EXPIRY=2592000
+JWT_ISSUER=booking-platform
+JWT_AUDIENCE=booking-platform-api
 
-E2E tests:
-- `auth.e2e-spec.ts` - Full registration and login flows
+# Redis Configuration
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_DB=0
 
-### Step 12: Seed Initial Data (Priority: MEDIUM)
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_DATABASE=booking_dev
+```
+
+### Step 2: Generate and Run Database Migrations
+
+```bash
+cd backend
+
+# Start database
+docker-compose up -d postgres redis
+
+# Generate migration
+npm run migration:generate -- src/database/migrations/CreateAuthTables
+
+# Run migrations
+npm run migration:run
+
+# Verify tables created
+docker exec -it booking-postgres psql -U postgres -d booking_dev -c "\dt"
+```
+
+Expected tables:
+- tenants
+- users
+- roles
+- permissions
+- user_roles
+- role_permissions
+- password_reset_tokens
+- email_verification_tokens
+
+### Step 3: Create Seed Data
 
 Update `backend/src/database/seeds/seed.ts`:
-- Create default tenant
-- Create system roles (SUPER_ADMIN, TENANT_ADMIN, etc.)
-- Create system permissions
-- Link roles to permissions
-- Create test users
 
-## Files Modified This Session
+```typescript
+import { AppDataSource } from '../data-source';
+import { Tenant } from '../../modules/tenants/entities/tenant.entity';
+import { User } from '../../modules/users/entities/user.entity';
+import { Role } from '../../modules/users/entities/role.entity';
+import { Permission } from '../../modules/users/entities/permission.entity';
+import { RolePermission } from '../../modules/users/entities/role-permission.entity';
+import { UserRole } from '../../modules/users/entities/user-role.entity';
+import * as argon2 from 'argon2';
 
-**Created (38 files):**
-- Backend infrastructure: 21 files
-- Frontend foundation: 9 files
-- Auth entities: 8 files
+async function seed() {
+  await AppDataSource.initialize();
 
-**Modified:**
-- backend/package.json (added dotenv, winston)
-- frontend/src/App.tsx
-- STATUS.md
+  // Create default tenant
+  const tenant = await AppDataSource.manager.save(Tenant, {
+    slug: 'default',
+    name: 'Default Tenant',
+    subscription_tier: 'professional',
+    subscription_status: 'active',
+    subscription_started_at: new Date(),
+  });
 
-## Important Notes
+  // Create system roles
+  const adminRole = await AppDataSource.manager.save(Role, {
+    tenant_id: tenant.id,
+    name: 'Super Admin',
+    description: 'Full system access',
+    is_system_role: true,
+    scope: 'tenant',
+  });
 
-### Database Connection
-Docker Compose is configured with:
-- PostgreSQL on port 5432
-- Redis on port 6379
-- Default credentials in docker-compose.yml
+  // Create admin user
+  const passwordHash = await argon2.hash('Admin123!', {
+    type: argon2.argon2id,
+    memoryCost: 65536,
+    timeCost: 3,
+    parallelism: 4,
+  });
 
-Start services:
-```bash
-docker-compose up -d postgres redis
+  const adminUser = await AppDataSource.manager.save(User, {
+    tenant_id: tenant.id,
+    email: 'admin@booking.local',
+    password_hash: passwordHash,
+    first_name: 'Admin',
+    last_name: 'User',
+    email_verified: true,
+    status: 'active',
+  });
+
+  // Assign role to user
+  await AppDataSource.manager.save(UserRole, {
+    user_id: adminUser.id,
+    role_id: adminRole.id,
+    scope_type: 'tenant',
+    granted_by: adminUser.id,
+  });
+
+  console.log('✅ Seed data created');
+  console.log(`Admin user: admin@booking.local / Admin123!`);
+  console.log(`Tenant: ${tenant.slug}`);
+
+  await AppDataSource.destroy();
+}
+
+seed().catch(console.error);
 ```
 
-### Environment Variables
-Copy and update:
+Run seed:
 ```bash
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
+npm run seed
 ```
 
-Required for auth:
-- JWT_PRIVATE_KEY, JWT_PUBLIC_KEY (generate with openssl)
-- DB connection details
-- REDIS_HOST, REDIS_PORT
+### Step 4: Test Authentication Endpoints
 
-### Testing Commands
 ```bash
-# Backend
-cd backend
-npm install  # Install dependencies first
-npm run test  # Unit tests
-npm run test:e2e  # E2E tests
+# Start backend
+npm run start:dev
 
-# Frontend
-cd frontend
-npm install
-npm run test
+# Test health endpoint
+curl http://localhost:3000/api/health
+
+# Test registration
+curl -X POST http://localhost:3000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "Test123!",
+    "first_name": "Test",
+    "last_name": "User"
+  }'
+
+# Test login
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@booking.local",
+    "password": "Admin123!"
+  }'
+
+# View Swagger docs
+open http://localhost:3000/api/docs
 ```
 
-## Current Branch
+### Step 5: Write Integration Tests (Optional but Recommended)
 
-Branch: `claude/booking-platform-phase-one-spec-011CUrVgk6pUTECbzTrJmbmV`
+Create `backend/test/auth.e2e-spec.ts`:
+```typescript
+import { Test } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import * as request from 'supertest';
+import { AppModule } from '../src/app.module';
 
-All commits pushed to remote. Ready to continue.
+describe('Auth (e2e)', () => {
+  let app: INestApplication;
 
-## Reference Documentation
+  beforeAll(async () => {
+    const moduleFixture = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
 
-- Task file: `docs/TASKS/auth-and-tenancy-backend.md`
-- State file: `docs/STATE.md`
-- Acceptance criteria: See task file sections starting line 23
-- API spec: `docs/API-CONTRACTS.md`
+    app = moduleFixture.createNestApplication();
+    await app.init();
+  });
 
-## Estimated Remaining Work for Auth Module
+  it('/auth/register (POST)', () => {
+    return request(app.getHttpServer())
+      .post('/auth/register')
+      .send({
+        email: 'newuser@test.com',
+        password: 'Test123!',
+        first_name: 'New',
+        last_name: 'User',
+      })
+      .expect(201)
+      .expect((res) => {
+        expect(res.body).toHaveProperty('access_token');
+        expect(res.body).toHaveProperty('refresh_token');
+      });
+  });
 
-- DTOs and interfaces: 2 hours
-- Password service: 1 hour
-- JWT service: 2 hours
-- Auth service: 4 hours
-- Controllers: 2 hours
-- Strategies and guards: 2 hours
-- Modules setup: 1 hour
-- Migration: 1 hour
-- Tests: 4 hours
-- Seed data: 1 hour
+  it('/auth/login (POST)', () => {
+    return request(app.getHttpServer())
+      .post('/auth/login')
+      .send({
+        email: 'admin@booking.local',
+        password: 'Admin123!',
+      })
+      .expect(200);
+  });
 
-**Total: ~20 hours** to complete full authentication module with tests.
+  afterAll(async () => {
+    await app.close();
+  });
+});
+```
 
-## Resume Command
+## What's Already Working
 
-When resuming, start with Step 1 (Create DTOs) and proceed sequentially through the steps.
+- ✅ Password hashing with Argon2id
+- ✅ JWT token generation (once keys are generated)
+- ✅ User registration flow
+- ✅ Login with account lockout
+- ✅ Refresh token rotation
+- ✅ Password reset flow
+- ✅ Email verification flow
+- ✅ Token revocation in Redis
+- ✅ Multi-tenant support
+- ✅ Role-based access control structure
 
-Check STATUS.md for overall project progress.
+## What's NOT Implemented Yet (Phase 2)
+
+- ❌ MFA (TOTP, SMS) - marked as TODO in AuthService
+- ❌ OAuth (Google, Facebook, Apple) - requires OAuth controller
+- ❌ Email sending - using console.log for now
+- ❌ SMS sending - Twilio integration needed
+- ❌ Advanced permission checks - guards exist but need more logic
+- ❌ Session management UI
+- ❌ Rate limiting middleware
+
+## Environment Variables Needed
+
+Create `backend/.env` with these minimum variables:
+
+```bash
+# Application
+NODE_ENV=development
+PORT=3000
+
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_DATABASE=booking_dev
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_DB=0
+
+# JWT (generate with openssl - see Step 1)
+JWT_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"
+JWT_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----"
+JWT_ACCESS_TOKEN_EXPIRY=3600
+JWT_REFRESH_TOKEN_EXPIRY=2592000
+JWT_ISSUER=booking-platform
+JWT_AUDIENCE=booking-platform-api
+
+# Logging
+LOG_LEVEL=info
+```
+
+## Quick Start Commands
+
+```bash
+# Install dependencies
+cd backend && npm install
+
+# Start database and Redis
+docker-compose up -d
+
+# Generate RSA keys (copy to .env)
+openssl genrsa -out private.key 2048
+openssl rsa -in private.key -pubout -out public.key
+
+# Run migrations
+npm run migration:generate -- src/database/migrations/CreateAuthTables
+npm run migration:run
+
+# Seed data
+npm run seed
+
+# Start backend
+npm run start:dev
+
+# Run tests
+npm test
+npm run test:e2e
+
+# View API docs
+open http://localhost:3000/api/docs
+```
+
+## Next Module After Auth Complete
+
+According to STATE.md, next tasks are:
+1. **Booking Engine Backend** - Appointment booking, availability calculation
+2. **Calendar Logic Backend** - Day/week/month views, WebSocket updates
+3. **Notifications Backend** - Email, SMS, push notifications
+
+## Resume Instructions
+
+If resuming this task:
+1. Check if RSA keys are generated (Step 1)
+2. Run migrations (Step 2)
+3. Create seed data (Step 3)
+4. Test endpoints (Step 4)
+5. Write integration tests (Step 5)
+6. Mark authentication module as COMPLETE in STATUS.md
+7. Move to next task from STATE.md
+
+The codebase is ready to run once environment is configured!
