@@ -6,6 +6,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseConfig } from './config/database.config';
 import { loggerConfig } from './config/logger.config';
+import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
+import { TenantsModule } from './modules/tenants/tenants.module';
 
 @Module({
   imports: [
@@ -22,6 +25,11 @@ import { loggerConfig } from './config/logger.config';
     TypeOrmModule.forRootAsync({
       useClass: DatabaseConfig,
     }),
+
+    // Feature Modules
+    AuthModule,
+    UsersModule,
+    TenantsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
