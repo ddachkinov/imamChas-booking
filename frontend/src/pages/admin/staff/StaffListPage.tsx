@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { staffApi } from '@/services/admin.api';
@@ -15,6 +16,7 @@ import { StaffInviteModal } from './StaffInviteModal';
 
 export const StaffListPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const toast = useToast();
   const queryClient = useQueryClient();
 
@@ -145,6 +147,13 @@ export const StaffListPage = () => {
       label: 'Actions',
       render: (staffMember: StaffMember) => (
         <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => navigate(`/admin/staff/${staffMember.id}`)}
+          >
+            View Details
+          </Button>
           <button
             onClick={() => handleEdit(staffMember)}
             className="text-gray-600 hover:text-gray-900"

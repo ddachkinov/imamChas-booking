@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { locationApi } from '@/services/admin.api';
@@ -13,6 +14,7 @@ import { LocationFormModal } from './LocationFormModal';
 
 export const LocationListPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const toast = useToast();
   const queryClient = useQueryClient();
 
@@ -113,6 +115,13 @@ export const LocationListPage = () => {
       label: 'Actions',
       render: (location: Location) => (
         <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => navigate(`/admin/locations/${location.id}`)}
+          >
+            View Details
+          </Button>
           {!location.is_primary && (
             <button
               onClick={() => handleSetPrimary(location)}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { serviceApi } from '@/services/admin.api';
@@ -32,6 +33,7 @@ const SERVICE_CATEGORIES = [
 
 export const ServiceListPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const toast = useToast();
   const queryClient = useQueryClient();
 
@@ -199,6 +201,13 @@ export const ServiceListPage = () => {
       label: 'Actions',
       render: (service: Service) => (
         <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => navigate(`/admin/services/${service.id}`)}
+          >
+            View Details
+          </Button>
           <button
             onClick={() => handleDuplicate(service)}
             className="text-gray-600 hover:text-gray-900"
