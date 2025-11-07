@@ -2,8 +2,8 @@
 
 **Last Updated:** 2025-11-07
 **Current Phase:** Phase 1 - Frontend Development
-**Active Task:** Calendar Complete with All Features
-**Overall Progress:** 75%
+**Active Task:** Calendar Complete with Export Functionality
+**Overall Progress:** 76%
 
 ## Completed Tasks
 
@@ -20,6 +20,7 @@
 11. **Calendar UI Frontend (MVP complete)** - Day/Week/Month views, appointment blocks, detail sidebar, status management, date navigation ✅
 12. **Calendar Enhancements** - Filters (status/staff), search functionality, quick create modal, filter logic integrated across all views ✅
 13. **Calendar Advanced Features** - Keyboard shortcuts, metrics widget, help modal, appointments list page ✅
+14. **Calendar Export Functionality** - Export to iCal/CSV/Print with client-side generation, compatible with calendar apps and spreadsheets ✅
 
 ## Current Task
 
@@ -834,4 +835,60 @@ None currently.
 - Comprehensive filtering and search
 - Keyboard navigation for power users
 - Quick creation and status management
+- Ready for backend integration testing
+
+### Session 10 (2025-11-07) - Calendar Export Functionality
+**Focus:** Add export capabilities to calendar
+
+**Completed:**
+- Implemented export.utils.ts with iCal and CSV generation
+- Implemented CalendarExportMenu dropdown component
+- Integrated export menu in CalendarPage toolbar
+- Integrated export menu in AppointmentListPage header
+- Added print functionality with formatted HTML
+
+**Export Features:**
+- Export to iCal (.ics) format:
+  - Compatible with Google Calendar, Apple Calendar, Outlook
+  - Includes all appointment details (client, service, staff, location, status)
+  - Proper VCALENDAR format with BEGIN/END markers
+  - Status mapping (pending→TENTATIVE, confirmed→CONFIRMED, etc.)
+  - Escape special characters for iCal compliance
+- Export to CSV format:
+  - Compatible with Excel, Google Sheets, Numbers
+  - Comprehensive data: appointment number, date, time, duration, client info, service, staff, location, status, notes
+  - Proper CSV field escaping and quoting
+- Print functionality:
+  - Formatted HTML with styled table
+  - Status badges color-coded
+  - Business name and generation date
+  - Opens in new window for printing
+- Export menu shows count of appointments in current view
+- Respects all filters (status, staff, search query)
+- Filename includes date range for organization
+- All exports work from both Calendar view and Appointments list
+
+**Technical Implementation:**
+- Headless UI Menu component for dropdown
+- Client-side file generation (no backend required)
+- Blob API for file downloads
+- date-fns for date formatting
+- Proper MIME types (text/calendar, text/csv)
+- URL.createObjectURL for download links
+- Automatic cleanup of blob URLs
+
+**Files Created:** 2 files (440+ insertions)
+- utils/export.utils.ts - Export generation functions
+- pages/calendar/components/CalendarExportMenu.tsx - Export menu UI
+
+**Files Modified:** 2 files
+- CalendarPage.tsx - Added export menu to toolbar
+- AppointmentListPage.tsx - Added export menu to header
+
+**Commit:**
+- Commit 8a5c872: Add calendar export functionality (iCal, CSV, Print)
+
+**Calendar Status:**
+- Full-featured calendar with export capabilities
+- Production-ready for business use
 - Ready for backend integration testing
