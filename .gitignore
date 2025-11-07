@@ -7,6 +7,13 @@ vendor/
 .env.local
 .env.*.local
 
+# Security - RSA Keys
+backend/private.key
+backend/public.key
+*.pem
+*.key
+!test/fixtures/*.key
+
 # Build outputs
 /dist
 /build
