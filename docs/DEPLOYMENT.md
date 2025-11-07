@@ -1,368 +1,611 @@
 # Deployment Guide
 
-## Overview
+This guide covers deploying the booking platform to production, including frontend, backend, database, and infrastructure setup.
 
-This guide provides step-by-step instructions for deploying the booking platform in development and production environments.
+## Table of Contents
+
+1. [Architecture Overview](#architecture-overview)
+2. [Prerequisites](#prerequisites)
+3. [Environment Configuration](#environment-configuration)
+4. [Database Setup](#database-setup)
+5. [Backend Deployment](#backend-deployment)
+6. [Frontend Deployment](#frontend-deployment)
+7. [Docker Deployment](#docker-deployment)
+8. [CI/CD Pipeline](#cicd-pipeline)
+9. [Monitoring and Logging](#monitoring-and-logging)
+10. [Security Checklist](#security-checklist)
+11. [Troubleshooting](#troubleshooting)
+
+## Architecture Overview
+
+### Production Architecture
+
+```
+                    ┌─────────────────┐
+                    │   CloudFlare    │
+                    │      CDN        │
+                    └────────┬────────┘
+                             │
+        ┌────────────────────┴────────────────────┐
+        │                                         │
+┌───────▼────────┐                       ┌───────▼────────┐
+│   Frontend     │                       │    Backend     │
+│   (Vercel)     │                       │   (Railway)    │
+│   React + Vite │───────HTTP───────────▶│    NestJS      │
+└────────────────┘                       └───────┬────────┘
+                                                 │
+                                    ┌────────────┴────────────┐
+                                    │                         │
+                            ┌───────▼────────┐       ┌───────▼────────┐
+                            │   PostgreSQL   │       │     Redis      │
+                            │   (Supabase)   │       │   (Upstash)    │
+                            └────────────────┘       └────────────────┘
+```
+
+### Recommended Services
+
+| Component | Service | Alternative |
+|-----------|---------|-------------|
+| Frontend Hosting | Vercel | Netlify, AWS Amplify |
+| Backend Hosting | Railway | Render, Heroku, AWS ECS |
+| Database | Supabase | Railway PostgreSQL, AWS RDS |
+| Redis | Upstash | Railway Redis, AWS ElastiCache |
+| File Storage | AWS S3 | Cloudinary, DigitalOcean Spaces |
+| Email | SendGrid | Mailgun, AWS SES |
+| SMS | Twilio | - |
+| Monitoring | Sentry | LogRocket, Datadog |
+| Analytics | PostHog | Mixpanel, Amplitude |
+
 
 ## Prerequisites
 
-- Node.js 18+ and npm
-- Docker and Docker Compose
-- PostgreSQL 15+ (if not using Docker)
-- Redis 7+ (if not using Docker)
-- Git
-
-## Development Environment Setup
-
-### 1. Clone Repository
+### Required Tools
 
 ```bash
-git clone <repository-url>
-cd imamChas-booking
+# Node.js 18+ and npm/yarn
+node -v  # Should be 18.x or higher
+npm -v
+
+# Docker and Docker Compose
+docker --version
+docker-compose --version
+
+# Git
+git --version
+
+# CLI tools for cloud providers
+vercel --version  # For Vercel deployment
+railway --version  # For Railway deployment
 ```
 
-### 2. Backend Setup
+### Accounts Required
+
+- [ ] GitHub account (for code repository)
+- [ ] Vercel account (for frontend hosting)
+- [ ] Railway/Render account (for backend hosting)
+- [ ] Supabase account (for database)
+- [ ] Upstash account (for Redis)
+- [ ] AWS account (for S3 storage)
+- [ ] SendGrid account (for email)
+- [ ] Twilio account (for SMS)
+- [ ] Sentry account (for error monitoring)
+
+## Environment Configuration
+
+### Backend Environment Variables
+
+Create `.env.production` in the backend directory:
 
 ```bash
-cd backend
-npm install
-```
+# Node Environment
+NODE_ENV=production
+PORT=3000
 
-### 3. Generate RSA Keys for JWT
-
-The application uses RS256 algorithm for JWT tokens, which requires RSA key pairs:
-
-```bash
-# Generate private key (2048-bit)
-openssl genrsa -out private.key 2048
-
-# Generate public key from private key
-openssl rsa -in private.key -pubout -out public.key
-
-# Secure the private key
-chmod 600 private.key
-```
-
-**Important:**
-- Keep `private.key` secure and never commit to version control
-- Both keys are already in `.gitignore`
-- In production, use environment variables or secure vaults (AWS Secrets Manager, HashiCorp Vault)
-
-### 4. Environment Configuration
-
-```bash
-# Copy example environment file
-cp .env.example .env
-
-# Edit .env with your configuration
-nano .env
-```
-
-**Required environment variables:**
-
-```env
 # Database
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_USER=postgres
-DATABASE_PASSWORD=<secure-password>
-DATABASE_NAME=booking_dev
+DATABASE_URL=postgresql://user:password@host:5432/dbname?sslmode=require
+DB_SSL_ENABLED=true
 
 # Redis
-REDIS_HOST=localhost
-REDIS_PORT=6379
+REDIS_URL=redis://default:password@host:6379
+REDIS_TLS_ENABLED=true
 
-# JWT
-JWT_PRIVATE_KEY_PATH=./private.key
-JWT_PUBLIC_KEY_PATH=./public.key
-JWT_REFRESH_SECRET=<generate-secure-random-string>
+# JWT Authentication
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+JWT_EXPIRES_IN=15m
+REFRESH_TOKEN_SECRET=your-super-secret-refresh-token-key
+REFRESH_TOKEN_EXPIRES_IN=7d
+
+# CORS
+CORS_ORIGIN=https://yourdomain.com,https://www.yourdomain.com
+ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+
+# File Upload (AWS S3)
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=your-aws-access-key
+AWS_SECRET_ACCESS_KEY=your-aws-secret-key
+S3_BUCKET_NAME=your-bucket-name
+S3_PUBLIC_URL=https://your-bucket.s3.amazonaws.com
 
 # Email (SendGrid)
-SENDGRID_API_KEY=<your-sendgrid-api-key>
-FROM_EMAIL=noreply@yourdomain.com
+SENDGRID_API_KEY=your-sendgrid-api-key
+EMAIL_FROM=noreply@yourdomain.com
+EMAIL_FROM_NAME=Your Business Name
 
-# SMS (Twilio) - Optional
-TWILIO_ACCOUNT_SID=<your-twilio-sid>
-TWILIO_AUTH_TOKEN=<your-twilio-token>
-TWILIO_PHONE_NUMBER=<your-twilio-number>
+# SMS (Twilio)
+TWILIO_ACCOUNT_SID=your-twilio-account-sid
+TWILIO_AUTH_TOKEN=your-twilio-auth-token
+TWILIO_PHONE_NUMBER=+1234567890
 
-# Stripe
-STRIPE_SECRET_KEY=<your-stripe-secret-key>
-STRIPE_WEBHOOK_SECRET=<your-stripe-webhook-secret>
+# Payment (Stripe)
+STRIPE_SECRET_KEY=sk_live_your-stripe-secret-key
+STRIPE_WEBHOOK_SECRET=whsec_your-webhook-secret
+STRIPE_PUBLIC_KEY=pk_live_your-stripe-public-key
 
-# Frontend
-FRONTEND_URL=http://localhost:3001
+# Calendar Integration (Google)
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_REDIRECT_URI=https://api.yourdomain.com/auth/google/callback
+
+# Monitoring
+SENTRY_DSN=https://your-sentry-dsn
+LOG_LEVEL=info
+
+# Rate Limiting
+RATE_LIMIT_TTL=60
+RATE_LIMIT_MAX=100
+
+# Feature Flags
+ENABLE_WEBSOCKET=true
+ENABLE_EMAIL_NOTIFICATIONS=true
+ENABLE_SMS_NOTIFICATIONS=true
 ```
 
-### 5. Start Docker Services
+### Frontend Environment Variables
+
+Create `.env.production` in the frontend directory:
 
 ```bash
-cd ..  # Return to project root
-docker-compose up -d postgres redis
+# API URLs
+VITE_API_URL=https://api.yourdomain.com
+VITE_WS_URL=wss://api.yourdomain.com
+
+# Public Keys
+VITE_STRIPE_PUBLIC_KEY=pk_live_your-stripe-public-key
+VITE_GOOGLE_MAPS_API_KEY=your-google-maps-api-key
+
+# Feature Flags
+VITE_ENABLE_ANALYTICS=true
+VITE_ENABLE_ERROR_TRACKING=true
+
+# Sentry
+VITE_SENTRY_DSN=https://your-sentry-dsn
+VITE_SENTRY_ENVIRONMENT=production
+
+# Analytics
+VITE_POSTHOG_KEY=your-posthog-key
+VITE_POSTHOG_HOST=https://app.posthog.com
 ```
 
-**Verify services are running:**
+### Environment Variable Security
+
+**IMPORTANT**: Never commit environment files to git.
 
 ```bash
-docker-compose ps
-
-# Should show:
-# booking-postgres  running  0.0.0.0:5432->5432/tcp
-# booking-redis     running  0.0.0.0:6379->6379/tcp
+# .gitignore should include:
+.env
+.env.*
+!.env.example
 ```
 
-**Check service health:**
+Store production secrets in:
+- **Railway/Render**: Dashboard → Environment Variables
+- **Vercel**: Dashboard → Project Settings → Environment Variables
+- **Local Development**: Use `.env.local` (gitignored)
+
+## Database Setup
+
+### Using Supabase (Recommended)
+
+1. **Create Project**: Visit https://supabase.com/dashboard → New Project
+2. **Get Connection String**: Settings → Database → Connection string (Transaction mode)
+3. **Run Migrations**:
+   ```bash
+   cd backend
+   export DATABASE_URL="your-supabase-connection-string"
+   npm run migration:run
+   ```
+4. **Seed Database**:
+   ```bash
+   npm run seed
+   ```
+
+### Using Railway PostgreSQL
+
+1. **Add Database**: Railway Dashboard → New → Database → PostgreSQL
+2. **Copy DATABASE_URL**: From Variables tab
+3. **Run Migrations**: Same as above
+
+### Database Backups
 
 ```bash
-# PostgreSQL
-docker exec booking-postgres pg_isready -U postgres
+# Manual backup
+pg_dump $DATABASE_URL > backup-$(date +%Y%m%d).sql
 
-# Redis
-docker exec booking-redis redis-cli ping
-# Should return: PONG
+# Restore
+psql $DATABASE_URL < backup-20251107.sql
+
+# Automated backups:
+# - Supabase: Automatic daily backups (7-day retention)
+# - Railway: Set up using Railway CLI or manual cron
 ```
 
-### 6. Generate and Run Database Migrations
+## Backend Deployment
+
+### Deploy to Railway
+
+1. **Install CLI**:
+   ```bash
+   npm install -g @railway/cli
+   railway login
+   ```
+
+2. **Initialize Project**:
+   ```bash
+   cd backend
+   railway init
+   ```
+
+3. **Set Environment Variables** (in Railway Dashboard):
+   - Go to project → Variables tab
+   - Add all variables from `.env.production`
+
+4. **Deploy**:
+   ```bash
+   railway up
+   ```
+
+5. **Custom Domain** (Optional):
+   ```bash
+   railway domain add api.yourdomain.com
+   # Add CNAME record: api.yourdomain.com → [railway-domain]
+   ```
+
+### Deploy to Render
+
+1. **Create Web Service**: Dashboard → New → Web Service
+2. **Settings**:
+   - Build Command: `npm install && npm run build`
+   - Start Command: `npm run start:prod`
+3. **Environment**: Add all production variables
+4. **Deploy**: Click "Create Web Service"
+
+### Health Check Endpoint
+
+```typescript
+// backend/src/health/health.controller.ts
+import { Controller, Get } from '@nestjs/common';
+
+@Controller('health')
+export class HealthController {
+  @Get()
+  check() {
+    return { status: 'ok', timestamp: new Date().toISOString() };
+  }
+}
+```
+
+## Frontend Deployment
+
+### Deploy to Vercel
+
+1. **Install CLI**:
+   ```bash
+   npm install -g vercel
+   vercel login
+   ```
+
+2. **Deploy**:
+   ```bash
+   cd frontend
+   vercel --prod
+   ```
+
+3. **Environment Variables** (in Vercel Dashboard):
+   - Project Settings → Environment Variables
+   - Add all `VITE_*` variables
+   - Redeploy after adding variables
+
+4. **Custom Domain**:
+   ```bash
+   vercel domains add yourdomain.com
+   # Add DNS records as instructed
+   ```
+
+### Deploy to Netlify
+
+1. **Create `netlify.toml`**:
+   ```toml
+   [build]
+     command = "npm run build"
+     publish = "dist"
+
+   [[redirects]]
+     from = "/*"
+     to = "/index.html"
+     status = 200
+   ```
+
+2. **Deploy**:
+   ```bash
+   npm install -g netlify-cli
+   netlify login
+   netlify init
+   netlify deploy --prod
+   ```
+
+## Docker Deployment
+
+### Docker Compose
+
+Create `docker-compose.prod.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: booking_platform
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD}@postgres:5432/booking_platform
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - redis
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      VITE_API_URL: http://backend:3000
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  redis_data:
+```
+
+### Backend Dockerfile
+
+```dockerfile
+# backend/Dockerfile
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM node:18-alpine
+WORKDIR /app
+RUN addgroup -g 1001 nodejs && adduser -S nestjs -u 1001
+COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
+USER nestjs
+EXPOSE 3000
+CMD ["node", "dist/main"]
+```
+
+### Frontend Dockerfile
+
+```dockerfile
+# frontend/Dockerfile
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+### Deploy
 
 ```bash
-cd backend
-
-# Generate migration from entities
-npm run migration:generate -- src/database/migrations/InitialSchema
-
-# Review the generated migration file in:
-# backend/src/database/migrations/
-
-# Run migrations
-npm run migration:run
-
-# Verify migrations were applied
-npm run migration:show
-```
-
-**Migration Commands:**
-
-```bash
-# Generate new migration
-npm run migration:generate -- src/database/migrations/MigrationName
-
-# Create empty migration
-npm run migration:create -- src/database/migrations/MigrationName
-
-# Run pending migrations
-npm run migration:run
-
-# Revert last migration
-npm run migration:revert
-
-# Show migration status
-npm run migration:show
-```
-
-### 7. Seed Database
-
-```bash
-# Run seed script
-npm run seed
-
-# This will create:
-# - Default tenant (PROFESSIONAL tier)
-# - 6 system roles (Super Admin, Tenant Admin, Business Owner, Manager, Staff, Client)
-# - 45+ granular permissions
-# - Admin user (admin@booking.local / Admin123!)
-```
-
-**Default Admin Credentials:**
-- Email: `admin@booking.local`
-- Password: `Admin123!`
-
-**Important:** Change the admin password immediately after first login in production!
-
-### 8. Start Backend Server
-
-```bash
-# Development mode with hot reload
-npm run start:dev
-
-# The server will start on http://localhost:3000
-# Swagger API documentation: http://localhost:3000/api/docs
-```
-
-### 9. Frontend Setup
-
-```bash
-cd ../frontend
-npm install
-
-# Copy environment file
-cp .env.example .env
-
-# Edit frontend .env
-# VITE_API_URL=http://localhost:3000/api
-
-# Start development server
-npm run dev
-
-# Frontend will be available at http://localhost:3001
-```
-
-## Database Schema
-
-The application uses 24 entities across 11 modules:
-
-### Authentication & Authorization (8 entities)
-- `tenant` - Multi-tenant isolation
-- `user` - User accounts with OAuth support
-- `role` - Role definitions
-- `permission` - Granular permissions
-- `user_role` - User-role assignments
-- `role_permission` - Role-permission assignments
-- `password_reset_token` - Password reset tokens
-- `email_verification_token` - Email verification tokens
-
-### Business Management (4 entities)
-- `business` - Business profiles
-- `location` - Physical locations
-- `service` - Service catalog
-- `staff_member` - Staff management
-
-### Booking & Scheduling (3 entities)
-- `client` - Client database
-- `appointment` - Appointment bookings
-- `appointment_addon` - Additional services
-
-### Calendar & Notifications (3 entities)
-- `blocked_time` - Time blocks (breaks, time-off)
-- `notification` - Multi-channel notifications
-- `notification_template` - Notification templates
-
-### Analytics (6 entities)
-- Various analytics and reporting tables
-
-## Entity Relationships
-
-```
-tenant (1) ──< (many) user
-tenant (1) ──< (many) business
-business (1) ──< (many) location
-business (1) ──< (many) service
-business (1) ──< (many) staff_member
-business (1) ──< (many) client
-location (1) ──< (many) appointment
-service (1) ──< (many) appointment
-staff_member (1) ──< (many) appointment
-client (1) ──< (many) appointment
-staff_member (1) ──< (many) blocked_time
-```
-
-## Production Deployment
-
-### Environment Preparation
-
-1. **Update Environment Variables**
-
-```env
-NODE_ENV=production
-DATABASE_PASSWORD=<strong-random-password>
-JWT_REFRESH_SECRET=<strong-random-secret>
-REDIS_PASSWORD=<strong-random-password>
-```
-
-2. **Security Checklist**
-
-- [ ] Change default admin password
-- [ ] Use strong database password
-- [ ] Enable Redis password authentication
-- [ ] Store RSA keys in secure vault
-- [ ] Enable HTTPS/TLS
-- [ ] Configure CORS properly
-- [ ] Set up rate limiting
-- [ ] Enable logging and monitoring
-- [ ] Configure backup strategy
-- [ ] Set up SSL/TLS for database connections
-
-3. **Database Backup**
-
-```bash
-# Backup database
-docker exec booking-postgres pg_dump -U postgres booking_prod > backup.sql
-
-# Restore database
-docker exec -i booking-postgres psql -U postgres booking_prod < backup.sql
-```
-
-4. **Build for Production**
-
-```bash
-cd backend
-npm run build
-
-# Backend will be built to dist/
-# Start with: npm run start:prod
-```
-
-5. **Docker Production Deployment**
-
-```bash
-# Build production image
-docker build -f backend/Dockerfile -t booking-backend:latest .
-
-# Run with docker-compose
 docker-compose -f docker-compose.prod.yml up -d
 ```
 
-### Monitoring
+## CI/CD Pipeline
 
-1. **Health Checks**
+### GitHub Actions
 
-```bash
-# Application health
-curl http://localhost:3000/health
+Create `.github/workflows/deploy.yml`:
 
-# Database connection
-curl http://localhost:3000/health/db
+```yaml
+name: Deploy to Production
 
-# Redis connection
-curl http://localhost:3000/health/redis
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Test Backend
+        run: |
+          cd backend
+          npm ci
+          npm run test
+      - name: Test Frontend
+        run: |
+          cd frontend
+          npm ci
+          npm run test
+
+  deploy-backend:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to Railway
+        uses: bervProject/railway-deploy@main
+        with:
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          service: backend
+
+  deploy-frontend:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: frontend
 ```
 
-2. **Logs**
+### Required Secrets
 
-```bash
-# View backend logs
-tail -f backend/logs/error.log
-tail -f backend/logs/combined.log
+Add in GitHub Settings → Secrets:
+- `RAILWAY_TOKEN`
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
 
-# Docker logs
-docker logs -f booking-backend
-docker logs -f booking-postgres
-docker logs -f booking-redis
-```
+## Monitoring and Logging
 
-### Performance Optimization
+### Sentry Error Tracking
 
-1. **Database Indexes**
+1. **Install**:
+   ```bash
+   # Backend
+   npm install @sentry/node
 
-All critical queries have indexes defined in entity decorators:
-- `tenant_id` on all tenant-scoped tables
-- Composite indexes for common query patterns
-- Unique constraints on email, role names, etc.
+   # Frontend
+   npm install @sentry/react
+   ```
 
-2. **Redis Caching**
+2. **Backend Setup**:
+   ```typescript
+   // backend/src/main.ts
+   import * as Sentry from '@sentry/node';
 
-- Session data cached in Redis
-- Token revocation list in Redis
-- Account lockout tracking in Redis
+   Sentry.init({
+     dsn: process.env.SENTRY_DSN,
+     environment: process.env.NODE_ENV,
+   });
+   ```
 
-3. **Connection Pooling**
+3. **Frontend Setup**:
+   ```typescript
+   // frontend/src/main.tsx
+   import * as Sentry from '@sentry/react';
 
-TypeORM connection pool configured in `database.config.ts`:
+   Sentry.init({
+     dsn: import.meta.env.VITE_SENTRY_DSN,
+     environment: import.meta.env.VITE_SENTRY_ENVIRONMENT,
+   });
+   ```
+
+### Application Logs
+
 ```typescript
-max: 10,              // Maximum connections
-min: 2,               // Minimum connections
-idle: 10000,          // Idle timeout
-acquire: 30000,       // Acquire timeout
-evict: 1000           // Eviction check interval
+// backend/src/logger/logger.service.ts
+import { Injectable, LoggerService } from '@nestjs/common';
+
+@Injectable()
+export class AppLogger implements LoggerService {
+  log(message: string, context?: string) {
+    console.log(`[${context}] ${message}`);
+  }
+
+  error(message: string, trace?: string, context?: string) {
+    console.error(`[${context}] ${message}`, trace);
+  }
+
+  warn(message: string, context?: string) {
+    console.warn(`[${context}] ${message}`);
+  }
+}
+```
+
+## Security Checklist
+
+### Pre-Deployment
+
+- [ ] All environment variables use strong, unique values
+- [ ] JWT secrets are cryptographically secure (32+ characters)
+- [ ] Database uses SSL/TLS connections
+- [ ] API uses HTTPS (TLS 1.2+)
+- [ ] CORS configured with specific origins (not `*`)
+- [ ] Rate limiting enabled
+- [ ] Input validation on all endpoints
+- [ ] SQL injection protection (ORM)
+- [ ] XSS protection enabled
+- [ ] File upload validation
+- [ ] Dependencies scanned (`npm audit`)
+- [ ] Error messages don't leak sensitive data
+- [ ] Admin endpoints require authentication
+
+### Security Headers
+
+```nginx
+# nginx.conf
+add_header X-Frame-Options "SAMEORIGIN" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header X-XSS-Protection "1; mode=block" always;
+add_header Strict-Transport-Security "max-age=31536000" always;
+add_header Referrer-Policy "no-referrer-when-downgrade" always;
+```
+
+### SSL Certificate
+
+```bash
+# Using Let's Encrypt
+sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+
+# Auto-renewal (cron)
+0 12 * * * /usr/bin/certbot renew --quiet
 ```
 
 ## Troubleshooting
@@ -370,145 +613,155 @@ evict: 1000           // Eviction check interval
 ### Database Connection Issues
 
 ```bash
-# Check if PostgreSQL is running
-docker ps | grep postgres
-
-# Check PostgreSQL logs
-docker logs booking-postgres
-
 # Test connection
-psql -h localhost -U postgres -d booking_dev
+psql $DATABASE_URL
+
+# Enable SSL
+psql "$DATABASE_URL?sslmode=require"
+
+# Common fixes:
+# - Enable SSL in database settings
+# - Whitelist backend IP
+# - Check connection pool settings
 ```
 
-### Redis Connection Issues
+### CORS Errors
+
+```typescript
+// Ensure CORS is properly configured
+app.enableCors({
+  origin: process.env.ALLOWED_ORIGINS.split(','),
+  credentials: true,
+});
+```
+
+### Memory Issues
 
 ```bash
-# Check if Redis is running
-docker ps | grep redis
-
-# Test connection
-redis-cli ping
-
-# Check Redis logs
-docker logs booking-redis
+# Increase Node.js memory
+NODE_OPTIONS="--max-old-space-size=2048" node dist/main.js
 ```
 
-### Migration Issues
+### Build Failures
 
 ```bash
-# Reset database (CAUTION: destroys all data)
-npm run migration:revert  # Revert all migrations
-npm run migration:run     # Re-run migrations
+# Clear cache and reinstall
+rm -rf node_modules package-lock.json
+npm install
 
-# Or drop and recreate database
-docker-compose down
-docker volume rm imamchas-booking_postgres_data
-docker-compose up -d postgres
-npm run migration:run
-npm run seed
+# Check Node version
+node -v  # Should be 18.x
 ```
 
-### Common Errors
-
-**Error: "Private key not found"**
-- Solution: Generate RSA keys using openssl commands above
-
-**Error: "Cannot connect to database"**
-- Check `DATABASE_HOST` in .env
-- Verify PostgreSQL is running: `docker ps`
-- Check credentials match docker-compose.yml
-
-**Error: "Redis connection failed"**
-- Check `REDIS_HOST` in .env
-- Verify Redis is running: `docker ps`
-- Test with: `redis-cli ping`
-
-## API Documentation
-
-Once the backend is running, access Swagger documentation:
-
-```
-http://localhost:3000/api/docs
-```
-
-## Testing
+### Deployment Verification
 
 ```bash
-# Run unit tests
-npm run test
+# Check backend health
+curl https://api.yourdomain.com/health
 
-# Run e2e tests
-npm run test:e2e
+# Check frontend
+curl https://yourdomain.com
 
-# Run tests with coverage
-npm run test:cov
+# Test API
+curl https://api.yourdomain.com/api/appointments
+
+# Check SSL
+openssl s_client -connect yourdomain.com:443
 ```
 
-## Continuous Integration
+### Rollback
 
-Example GitHub Actions workflow:
-
-```yaml
-name: CI
-
-on: [push, pull_request]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_DB: booking_test
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      redis:
-        image: redis:7-alpine
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Install dependencies
-        run: |
-          cd backend
-          npm ci
-
-      - name: Generate RSA keys
-        run: |
-          cd backend
-          openssl genrsa -out private.key 2048
-          openssl rsa -in private.key -pubout -out public.key
-
-      - name: Run migrations
-        run: |
-          cd backend
-          npm run migration:run
-
-      - name: Run tests
-        run: |
-          cd backend
-          npm run test:e2e
+**Vercel**:
+```bash
+vercel rollback [deployment-url]
 ```
 
-## Support
+**Railway**:
+```bash
+# Redeploy previous commit
+git revert HEAD
+git push
+```
 
-For issues and questions:
-- GitHub Issues: [Link to repository issues]
-- Documentation: [Link to full documentation]
-- Email: support@yourdomain.com
+**Database**:
+```bash
+# Restore from backup
+psql $DATABASE_URL < backup-20251107.sql
+```
+
+## Post-Deployment Checklist
+
+- [ ] Frontend loads at production URL
+- [ ] Backend health check returns 200
+- [ ] Database migrations applied
+- [ ] Can log in with test account
+- [ ] Can create appointment (full flow)
+- [ ] Email notifications work
+- [ ] SMS notifications work (if enabled)
+- [ ] Payment processing works
+- [ ] Real-time updates work (WebSocket)
+- [ ] File uploads work
+- [ ] Analytics tracking enabled
+- [ ] Error tracking captures errors
+- [ ] SSL certificate valid
+- [ ] No console errors
+- [ ] No server errors in logs
+- [ ] Performance acceptable
+- [ ] Mobile responsive
+- [ ] Cross-browser compatible
+
+## Maintenance
+
+### Regular Tasks
+
+**Daily**:
+- Monitor error rates in Sentry
+- Check server resource usage
+- Review application logs
+
+**Weekly**:
+- Review database performance
+- Check backup integrity
+- Update dependencies (patch versions)
+
+**Monthly**:
+- Security audit (`npm audit`)
+- Review slow queries
+- Database maintenance (vacuum, reindex)
+- Update documentation
+
+### Scaling
+
+**When to scale**:
+- CPU usage >70%
+- Memory usage >80%
+- Response times >1s
+- Connection pool exhausted
+
+**Horizontal scaling**:
+- Increase replicas in platform dashboard
+- Requires stateless backend (sessions in Redis)
+- Load balancer (automatic in most platforms)
+
+**Vertical scaling**:
+- Upgrade instance size
+- Increase database resources
+- Add read replicas
+
+## Conclusion
+
+This deployment guide covers production deployment essentials:
+
+1. Use managed services for easier operations
+2. Implement monitoring and logging
+3. Follow security best practices
+4. Automate with CI/CD
+5. Test thoroughly
+6. Have rollback procedures ready
+7. Monitor post-deployment
+8. Plan for scaling
+
+For more information:
+- [NestJS Deployment](https://docs.nestjs.com/deployment)
+- [Vite Deployment](https://vitejs.dev/guide/static-deploy.html)
+- Platform-specific docs (Railway, Vercel, etc.)
