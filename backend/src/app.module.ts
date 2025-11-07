@@ -16,6 +16,7 @@ import { StaffModule } from './modules/staff/staff.module';
 import { ClientsModule } from './modules/clients/clients.module';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { CalendarModule } from './modules/calendar/calendar.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     ClientsModule,
     AppointmentsModule,
     NotificationsModule,
+    CalendarModule,
   ],
   controllers: [AppController],
   providers: [AppService],
