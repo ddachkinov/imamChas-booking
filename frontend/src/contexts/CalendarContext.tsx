@@ -384,3 +384,45 @@ export const getStatusLabel = (status: AppointmentStatus): string => {
       return status;
   }
 };
+
+/**
+ * Filter appointments based on filters and search query
+ */
+export const filterAppointments = (
+  appointments: any[],
+  filters: CalendarFilters
+): any[] => {
+  return appointments.filter((apt) => {
+    // Filter by status
+    if (filters.status.length > 0 && !filters.status.includes(apt.status)) {
+      return false;
+    }
+
+    // Filter by staff
+    if (filters.staff_ids.length > 0 && !filters.staff_ids.includes(apt.staff_id)) {
+      return false;
+    }
+
+    // Filter by service
+    if (filters.service_ids.length > 0 && !filters.service_ids.includes(apt.service_id)) {
+      return false;
+    }
+
+    // Filter by search query
+    if (filters.search_query) {
+      const query = filters.search_query.toLowerCase();
+      const matchesClient = apt.client_name.toLowerCase().includes(query);
+      const matchesEmail = apt.client_email?.toLowerCase().includes(query);
+      const matchesPhone = apt.client_phone?.toLowerCase().includes(query);
+      const matchesService = apt.service_name.toLowerCase().includes(query);
+      const matchesStaff = apt.staff_name?.toLowerCase().includes(query);
+      const matchesNumber = apt.appointment_number?.toLowerCase().includes(query);
+
+      if (!matchesClient && !matchesEmail && !matchesPhone && !matchesService && !matchesStaff && !matchesNumber) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+};

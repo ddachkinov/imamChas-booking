@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { format } from 'date-fns';
-import { useCalendar, generateTimeSlots, calculateAppointmentPosition } from '@/contexts/CalendarContext';
+import { useCalendar, generateTimeSlots, calculateAppointmentPosition, filterAppointments } from '@/contexts/CalendarContext';
 import { AppointmentBlock } from '../components/AppointmentBlock';
 import type { CalendarData, CalendarAppointment } from '@/types/calendar.types';
 
@@ -25,11 +25,14 @@ export const DayView: React.FC<DayViewProps> = ({ calendarData }) => {
   const timeSlots = generateTimeSlots(startHour, endHour, 15);
 
   // Filter appointments for current day
-  const dayAppointments = calendarData.appointments.filter((apt) => {
-    const aptDate = format(new Date(apt.date), 'yyyy-MM-dd');
-    const currentDate = format(state.currentDate, 'yyyy-MM-dd');
-    return aptDate === currentDate;
-  });
+  const dayAppointments = filterAppointments(
+    calendarData.appointments.filter((apt) => {
+      const aptDate = format(new Date(apt.date), 'yyyy-MM-dd');
+      const currentDate = format(state.currentDate, 'yyyy-MM-dd');
+      return aptDate === currentDate;
+    }),
+    state.filters
+  );
 
   // Scroll to current time on mount
   useEffect(() => {

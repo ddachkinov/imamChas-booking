@@ -1,6 +1,6 @@
 import React from 'react';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay } from 'date-fns';
-import { useCalendar } from '@/contexts/CalendarContext';
+import { useCalendar, filterAppointments } from '@/contexts/CalendarContext';
 import type { CalendarData } from '@/types/calendar.types';
 
 interface MonthViewProps {
@@ -32,11 +32,14 @@ export const MonthView: React.FC<MonthViewProps> = ({ calendarData }) => {
 
   // Get appointments for a specific day
   const getAppointmentsForDay = (date: Date) => {
-    return calendarData.appointments.filter((apt) => {
-      const aptDate = format(new Date(apt.date), 'yyyy-MM-dd');
-      const dayDate = format(date, 'yyyy-MM-dd');
-      return aptDate === dayDate;
-    });
+    return filterAppointments(
+      calendarData.appointments.filter((apt) => {
+        const aptDate = format(new Date(apt.date), 'yyyy-MM-dd');
+        const dayDate = format(date, 'yyyy-MM-dd');
+        return aptDate === dayDate;
+      }),
+      state.filters
+    );
   };
 
   // Handle day click - switch to day view for that date

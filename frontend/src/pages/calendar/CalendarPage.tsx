@@ -9,6 +9,9 @@ import { DayView } from './views/DayView';
 import { WeekView } from './views/WeekView';
 import { MonthView } from './views/MonthView';
 import { AppointmentDetailSidebar } from './components/AppointmentDetailSidebar';
+import { CalendarFilters } from './components/CalendarFilters';
+import { CalendarSearch } from './components/CalendarSearch';
+import { QuickCreateModal } from './components/QuickCreateModal';
 import { Button } from '@/components/ui/Button';
 import type { CalendarView } from '@/types/calendar.types';
 
@@ -89,7 +92,7 @@ const CalendarContent: React.FC = () => {
   return (
     <div className="h-full flex flex-col bg-gray-50">
       {/* Toolbar */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
+      <div className="bg-white border-b border-gray-200 px-4 py-3 space-y-3">
         <div className="flex items-center justify-between flex-wrap gap-4">
           {/* Left: View selector and navigation */}
           <div className="flex items-center gap-4">
@@ -165,6 +168,14 @@ const CalendarContent: React.FC = () => {
             </Button>
           </div>
         </div>
+
+        {/* Filters and Search */}
+        {calendarData && (
+          <div className="flex items-center gap-4 flex-wrap">
+            <CalendarSearch />
+            <CalendarFilters calendarData={calendarData} />
+          </div>
+        )}
       </div>
 
       {/* Calendar view */}
@@ -177,6 +188,13 @@ const CalendarContent: React.FC = () => {
           onClose={actions.closeSidebar}
         />
       )}
+
+      {/* Quick create modal */}
+      <QuickCreateModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        businessId={businessId}
+      />
     </div>
   );
 };

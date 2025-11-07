@@ -1,6 +1,6 @@
 import React from 'react';
 import { format, addDays, startOfWeek, isSameDay } from 'date-fns';
-import { useCalendar, generateTimeSlots, calculateAppointmentPosition } from '@/contexts/CalendarContext';
+import { useCalendar, generateTimeSlots, calculateAppointmentPosition, filterAppointments } from '@/contexts/CalendarContext';
 import { AppointmentBlock } from '../components/AppointmentBlock';
 import type { CalendarData, CalendarAppointment } from '@/types/calendar.types';
 
@@ -28,11 +28,14 @@ export const WeekView: React.FC<WeekViewProps> = ({ calendarData }) => {
 
   // Get appointments for a specific day
   const getAppointmentsForDay = (date: Date): CalendarAppointment[] => {
-    return calendarData.appointments.filter((apt) => {
-      const aptDate = format(new Date(apt.date), 'yyyy-MM-dd');
-      const dayDate = format(date, 'yyyy-MM-dd');
-      return aptDate === dayDate;
-    });
+    return filterAppointments(
+      calendarData.appointments.filter((apt) => {
+        const aptDate = format(new Date(apt.date), 'yyyy-MM-dd');
+        const dayDate = format(date, 'yyyy-MM-dd');
+        return aptDate === dayDate;
+      }),
+      state.filters
+    );
   };
 
   return (
