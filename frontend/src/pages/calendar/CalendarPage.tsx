@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { CalendarProvider, useCalendar, getDateRange, formatDateRange } from '@/contexts/CalendarContext';
 import { calendarApi } from '@/services/calendar.api';
 import { useAuth } from '@/contexts/AuthContext';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { DayView } from './views/DayView';
 import { WeekView } from './views/WeekView';
@@ -12,6 +13,8 @@ import { AppointmentDetailSidebar } from './components/AppointmentDetailSidebar'
 import { CalendarFilters } from './components/CalendarFilters';
 import { CalendarSearch } from './components/CalendarSearch';
 import { QuickCreateModal } from './components/QuickCreateModal';
+import { CalendarMetrics } from './components/CalendarMetrics';
+import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal';
 import { Button } from '@/components/ui/Button';
 import type { CalendarView } from '@/types/calendar.types';
 
@@ -21,6 +24,11 @@ const CalendarContent: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   const businessId = user?.tenant_id || '';
+
+  // Enable keyboard shortcuts
+  useKeyboardShortcuts({
+    onNewAppointment: () => setShowCreateModal(true),
+  });
 
   // Get date range for current view
   const dateRange = getDateRange(state.currentView, state.currentDate);
@@ -91,6 +99,13 @@ const CalendarContent: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
+      {/* Metrics */}
+      {state.currentView === 'day' && (
+        <div className="bg-gray-50 px-4 pt-4">
+          <CalendarMetrics businessId={businessId} date={state.currentDate} />
+        </div>
+      )}
+
       {/* Toolbar */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 space-y-3">
         <div className="flex items-center justify-between flex-wrap gap-4">
@@ -195,6 +210,9 @@ const CalendarContent: React.FC = () => {
         onClose={() => setShowCreateModal(false)}
         businessId={businessId}
       />
+
+      {/* Keyboard shortcuts modal */}
+      <KeyboardShortcutsModal />
     </div>
   );
 };
