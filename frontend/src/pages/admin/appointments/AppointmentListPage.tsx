@@ -8,6 +8,7 @@ import { CalendarFilters } from '@/pages/calendar/components/CalendarFilters';
 import { CalendarSearch } from '@/pages/calendar/components/CalendarSearch';
 import { AppointmentDetailSidebar } from '@/pages/calendar/components/AppointmentDetailSidebar';
 import { StatusBadge } from '@/pages/calendar/components/StatusBadge';
+import { CalendarExportMenu } from '@/pages/calendar/components/CalendarExportMenu';
 import { CalendarProvider } from '@/contexts/CalendarContext';
 import type { CalendarAppointment } from '@/types/calendar.types';
 
@@ -66,10 +67,20 @@ const AppointmentListContent: React.FC = () => {
   return (
     <div className="h-full flex flex-col">
       <div className="flex-shrink-0 border-b border-gray-200 bg-white px-6 py-4">
-        <h1 className="text-2xl font-bold text-gray-900">Appointments</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          View and manage all appointments
-        </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Appointments</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              View and manage all appointments
+            </p>
+          </div>
+          {calendarData && (
+            <CalendarExportMenu
+              calendarData={calendarData}
+              businessName={user?.business_name || 'Business'}
+            />
+          )}
+        </div>
       </div>
 
       {/* Filters */}

@@ -15,6 +15,7 @@ import { CalendarSearch } from './components/CalendarSearch';
 import { QuickCreateModal } from './components/QuickCreateModal';
 import { CalendarMetrics } from './components/CalendarMetrics';
 import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal';
+import { CalendarExportMenu } from './components/CalendarExportMenu';
 import { Button } from '@/components/ui/Button';
 import type { CalendarView } from '@/types/calendar.types';
 
@@ -175,6 +176,12 @@ const CalendarContent: React.FC = () => {
 
           {/* Right: Actions */}
           <div className="flex items-center gap-2">
+            {calendarData && (
+              <CalendarExportMenu
+                calendarData={calendarData}
+                businessName={user?.business_name || 'Business'}
+              />
+            )}
             <Button
               onClick={() => setShowCreateModal(true)}
               icon={<PlusIcon className="w-5 h-5" />}
