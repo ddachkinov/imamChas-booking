@@ -3,6 +3,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { AdminRoutes } from '@/routes/AdminRoutes';
+import { BookingPage } from '@/pages/booking/BookingPage';
+import { BookingBySlugPage } from '@/pages/booking/BookingBySlugPage';
 import { ToastContainer } from '@/components/ui/Toast';
 import { useToastStore } from '@/hooks/useToast';
 
@@ -29,7 +31,10 @@ function App() {
             {/* Admin routes */}
             <Route path="/admin/*" element={<AdminRoutes />} />
 
-            {/* TODO: Add public booking routes */}
+            {/* Public booking routes */}
+            <Route path="/book/:businessId" element={<BookingPage />} />
+            <Route path="/b/:slug" element={<BookingBySlugPage />} />
+
             {/* TODO: Add login/register routes */}
           </Routes>
         </BrowserRouter>
