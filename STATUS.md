@@ -2,8 +2,8 @@
 
 **Last Updated:** 2025-11-07
 **Current Phase:** Phase 1 - Frontend Development
-**Active Task:** Notification Settings Complete
-**Overall Progress:** 81%
+**Active Task:** All Settings Pages Complete
+**Overall Progress:** 83%
 
 ## Completed Tasks
 
@@ -25,6 +25,8 @@
 16. **UI Components Library** - Skeleton loading components (15+ variants) and ErrorBoundary for graceful error handling ✅
 17. **Frontend Documentation** - Comprehensive 500+ line README with architecture, patterns, deployment instructions ✅
 18. **Notification Settings Page** - Complete notification management UI with channel and event-level controls ✅
+19. **Integration Settings Page** - 6 third-party integrations management (Google Calendar, Stripe, Mailgun, Twilio, Zapier, Outlook) ✅
+20. **Billing Settings Page** - Complete subscription and billing management with plans, usage, payment methods, invoices ✅
 
 ## Current Task
 
@@ -1152,3 +1154,88 @@ None currently.
 - Notification settings page complete
 - Professional and intuitive UI
 - Ready for backend API integration
+
+### Session 15 (2025-11-07) - Settings Pages Complete
+**Focus:** Complete all settings management pages
+
+**Completed:**
+- Implemented Integration Settings page with 6 integrations
+- Implemented Billing Settings page with subscription management
+- All settings pages now functional (Notifications, Integrations, Billing)
+
+**Integration Settings Features:**
+- 6 Third-Party Integrations:
+  - Google Calendar (calendar sync, conflict detection)
+  - Stripe (payments, refunds, recurring billing)
+  - Mailgun (transactional emails, templates, tracking)
+  - Twilio (SMS reminders, two-way messaging)
+  - Zapier (3,000+ app connections, automation)
+  - Outlook Calendar (calendar sync, meeting invites)
+- Connection Management:
+  - Connect/disconnect/configure workflows
+  - OAuth flow support (placeholder)
+  - Status badges (connected/disconnected/error)
+  - Connection date and config display
+  - Error state handling with reconnect option
+- Integration Cards:
+  - Feature lists for each integration
+  - Icon-based visual design
+  - 2-column responsive grid
+  - Loading states during operations
+- Help section with integration guides link
+
+**Billing Settings Features:**
+- Subscription Management:
+  - Current plan display (Starter/Professional/Enterprise)
+  - Status badges (active/cancelled/past_due/trialing)
+  - Billing period and next billing date
+  - Cancel subscription with confirmation
+  - Cancel at period end warning
+- Plan Comparison:
+  - 3 subscription tiers with feature lists
+  - Toggle plan comparison cards
+  - Current plan indicator
+  - Change plan with loading state
+  - Feature limits displayed
+- Current Usage Metrics:
+  - Locations (used/available)
+  - Staff members (used/available)
+  - Appointments (monthly count)
+  - Storage (GB used/available)
+  - 4-column responsive grid
+- Payment Methods:
+  - List payment methods (brand, last4, expiry)
+  - Default payment method indicator
+  - Set default/remove actions
+  - Add new payment method button
+- Invoice History:
+  - Invoice table with number, date, amount, status
+  - Download invoice action
+  - Status badges for invoice status
+  - Responsive table layout
+
+**Technical Implementation:**
+- React Query for data fetching and caching
+- useMutation for all update operations
+- Confirmation dialogs for destructive actions
+- Toast notifications for all actions
+- Status badges with color-coded states
+- Professional card and table layouts
+- date-fns for date formatting
+- Mock data with realistic examples
+- Loading and error states
+
+**Files Modified:** 2 files (920+ insertions)
+- pages/admin/settings/IntegrationSettingsPage.tsx (360+ insertions)
+- pages/admin/settings/BillingSettingsPage.tsx (560+ insertions)
+
+**Commits:**
+- Commit 538a283: Implement Integration Settings page
+- Commit 4ca11ab: Implement Billing Settings page
+
+**Settings Status:**
+- All 3 settings pages complete (Notifications, Integrations, Billing)
+- Professional and intuitive UIs
+- Ready for backend API integration
+- Placeholder OAuth flows for integrations
+- Subscription management ready for Stripe
