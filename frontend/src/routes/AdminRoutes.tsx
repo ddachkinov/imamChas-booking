@@ -14,6 +14,7 @@ import { StaffListPage } from '@/pages/admin/staff/StaffListPage';
 import { StaffDetailsPage } from '@/pages/admin/staff/StaffDetailsPage';
 import { ClientListPage } from '@/pages/admin/clients/ClientListPage';
 import { ClientDetailsPage } from '@/pages/admin/clients/ClientDetailsPage';
+import { AppointmentListPage } from '@/pages/admin/appointments/AppointmentListPage';
 import { CalendarPage } from '@/pages/calendar/CalendarPage';
 import { AnalyticsPage } from '@/pages/admin/analytics/AnalyticsPage';
 import { SettingsPage } from '@/pages/admin/settings/SettingsPage';
@@ -48,6 +49,9 @@ export const AdminRoutes = () => {
           {/* Clients */}
           <Route path="/clients" element={<ClientListPage />} />
           <Route path="/clients/:clientId" element={<ClientDetailsPage />} />
+
+          {/* Appointments */}
+          <Route path="/appointments" element={<AppointmentListPage />} />
 
           {/* Calendar */}
           <Route path="/calendar" element={<CalendarPage />} />
