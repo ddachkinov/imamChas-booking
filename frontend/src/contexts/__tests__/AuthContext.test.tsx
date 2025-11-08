@@ -2,7 +2,6 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { AuthProvider, useAuth } from '../AuthContext';
 import { apiService } from '@/services/api.service';
 import { StaffRole } from '@/types/admin.types';
-import type { User } from '@/types/admin.types';
 
 // Mock API service
 jest.mock('@/services/api.service');
@@ -34,7 +33,7 @@ const mockUser = {
   last_name: 'Doe',
   email: 'john@example.com',
   phone: '+1234567890',
-  role: StaffRole.MANAGER,
+  role: StaffRole.ADMIN,
   permissions: ['appointments:read', 'appointments:write', 'clients:read'],
   business_id: 'business-1',
   tenant_id: 'tenant-1',

@@ -28,7 +28,7 @@ interface NavigationItem {
 export const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   const navigation: NavigationItem[] = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon, current: location.pathname === '/admin/dashboard' },

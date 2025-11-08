@@ -87,7 +87,7 @@ interface CalendarProviderProps {
   businessId?: string;
 }
 
-export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children, businessId }) => {
+export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children, businessId: _businessId }) => {
   const [state, setState] = useState<CalendarState>(getInitialState);
 
   // Save preferences when view or staff selection changes

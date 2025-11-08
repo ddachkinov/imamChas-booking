@@ -50,7 +50,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const loadUser = async () => {
     try {
       const response = await apiService.get<AuthUser>('/auth/me');
-      setUser(response.data);
+      if (response.data) {
+        setUser(response.data);
+      }
     } catch (error) {
       console.error('Failed to load user:', error);
       localStorage.removeItem('access_token');
@@ -66,8 +68,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         password,
       });
 
-      apiService.setToken(response.data.access_token);
-      setUser(response.data.user);
+      if (response.data) {
+        apiService.setToken(response.data.access_token);
+        setUser(response.data.user);
+      }
     } catch (error) {
       throw error;
     }

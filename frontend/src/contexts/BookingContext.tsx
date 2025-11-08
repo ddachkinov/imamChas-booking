@@ -2,12 +2,10 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import {
   BookingState,
   BookingActions,
-  Business,
   Location,
   Service,
   StaffMember,
   ClientInfo,
-  ConfirmedAppointment,
   BookingStep,
 } from '@/types/booking.types';
 import { bookingApi } from '@/services/booking.api';
