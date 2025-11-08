@@ -1,12 +1,25 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { AdminRoutes } from '@/routes/AdminRoutes';
-import { BookingPage } from '@/pages/booking/BookingPage';
-import { BookingBySlugPage } from '@/pages/booking/BookingBySlugPage';
 import { ToastContainer } from '@/components/ui/Toast';
 import { useToastStore } from '@/hooks/useToast';
+
+// Lazy-loaded booking pages for better performance
+const BookingPage = lazy(() => import('@/pages/booking/BookingPage').then(m => ({ default: m.BookingPage })));
+const BookingBySlugPage = lazy(() => import('@/pages/booking/BookingBySlugPage').then(m => ({ default: m.BookingBySlugPage })));
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="flex items-center justify-center h-screen">
+    <div className="flex flex-col items-center gap-4">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <p className="text-sm text-gray-500">Loading...</p>
+    </div>
+  </div>
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,8 +45,22 @@ function App() {
             <Route path="/admin/*" element={<AdminRoutes />} />
 
             {/* Public booking routes */}
-            <Route path="/book/:businessId" element={<BookingPage />} />
-            <Route path="/b/:slug" element={<BookingBySlugPage />} />
+            <Route
+              path="/book/:businessId"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <BookingPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/b/:slug"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <BookingBySlugPage />
+                </Suspense>
+              }
+            />
 
             {/* TODO: Add login/register routes */}
           </Routes>
