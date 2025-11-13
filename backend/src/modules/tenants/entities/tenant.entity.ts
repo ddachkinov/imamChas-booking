@@ -34,8 +34,15 @@ export class Tenant {
   @Index()
   slug: string;
 
+  @Column({ unique: true })
+  @Index()
+  subdomain: string;
+
   @Column()
   name: string;
+
+  @Column({ default: 'active' })
+  status: string;
 
   @Column({
     type: 'enum',
