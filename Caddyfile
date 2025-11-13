@@ -1,0 +1,27 @@
+{
+    email {$ACME_EMAIL}
+}
+
+# Main domain - Frontend
+{$MAIN_DOMAIN} {
+    reverse_proxy frontend:80
+}
+
+# API subdomain - Backend
+api.{$MAIN_DOMAIN} {
+    reverse_proxy backend:3000
+}
+
+# Wildcard for tenant subdomains - Frontend
+*.{$MAIN_DOMAIN} {
+    # For API calls from tenant subdomains
+    @api path /api/*
+    handle @api {
+        reverse_proxy backend:3000
+    }
+
+    # All other requests go to frontend
+    handle {
+        reverse_proxy frontend:80
+    }
+}
