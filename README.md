@@ -170,6 +170,55 @@ docker-compose down
 - Backend API: http://localhost:3000
 - API Documentation: http://localhost:3000/api/docs
 
+## Deployment
+
+This platform can be deployed in multiple ways depending on your needs:
+
+### Quick Start (30 minutes)
+
+For the fastest deployment with Docker on a single server:
+
+```bash
+# 1. Get a server ($12/mo from DigitalOcean, Hetzner, etc.)
+# 2. Configure DNS (point *.yourdomain.com to server)
+# 3. Run setup
+curl -fsSL https://raw.githubusercontent.com/ddachkinov/imamChas-booking/main/scripts/server-setup.sh | bash
+
+# 4. Clone repo and configure
+cd /opt/booking-platform
+git clone <your-repo> .
+./scripts/configure-env.sh  # Interactive configuration
+./deploy.sh                 # Deploy everything
+```
+
+**📖 Detailed Guide**: [DOCKER-QUICKSTART.md](DOCKER-QUICKSTART.md)
+
+### SaaS Multi-Tenant Architecture
+
+To transform this into a multi-tenant SaaS platform where businesses can sign up and subscribe:
+
+**📖 Comprehensive Guides**:
+- [SAAS-ARCHITECTURE.md](docs/SAAS-ARCHITECTURE.md) - Architecture overview, pricing tiers, revenue models
+- [SAAS-IMPLEMENTATION-STEPS.md](docs/SAAS-IMPLEMENTATION-STEPS.md) - 7-phase implementation guide with code
+- [SAAS-DOCKER-DEPLOYMENT.md](docs/SAAS-DOCKER-DEPLOYMENT.md) - Docker-based SaaS deployment ($12/mo vs $100-500/mo)
+- [FIRST-DEPLOYMENT-GUIDE.md](docs/FIRST-DEPLOYMENT-GUIDE.md) - Step-by-step walkthrough for first deployment
+
+### Traditional Cloud Deployment
+
+For deploying to managed services (Vercel, Railway, Supabase):
+
+**📖 Guide**: [DEPLOYMENT.md](docs/DEPLOYMENT.md)
+
+### Cost Comparison
+
+| Approach | Monthly Cost | Setup Time | Scalability |
+|----------|-------------|------------|-------------|
+| **Docker (Single Server)** | $12-40 | 30 min | High |
+| **Traditional (Multiple Services)** | $100-500 | 4-6 hours | Very High |
+| **Enterprise (Kubernetes)** | $200+ | 1-2 days | Unlimited |
+
+**Recommendation**: Start with Docker deployment for best value and simplicity.
+
 ## Development Workflow
 
 ### Running Tests
