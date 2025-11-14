@@ -2,16 +2,15 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
   Index,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
 import { User } from './user.entity';
-import { Role, RoleScope } from './role.entity';
+import { Role } from './role.entity';
 
 @Entity('user_roles')
-@Index(['user_id', 'role_id', 'scope_type', 'scope_id'], { unique: true })
+@Index(['user_id', 'role_id'], { unique: true })
 @Index(['user_id'])
 @Index(['role_id'])
 export class UserRole {
@@ -24,26 +23,11 @@ export class UserRole {
   @Column('uuid')
   role_id: string;
 
-  @Column({
-    type: 'enum',
-    enum: RoleScope,
-  })
-  scope_type: RoleScope;
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  assigned_at: Date;
 
   @Column('uuid', { nullable: true })
-  scope_id: string; // null for TENANT scope, business_id or location_id for others
-
-  @Column('uuid')
-  granted_by: string; // User ID who granted this role
-
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  granted_at: Date;
-
-  @Column({ type: 'timestamp', nullable: true })
-  expires_at: Date;
-
-  @CreateDateColumn()
-  created_at: Date;
+  assigned_by: string;
 
   // Relationships
   @ManyToOne(() => User, (user) => user.userRoles)
