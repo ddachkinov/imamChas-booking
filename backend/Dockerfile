@@ -25,6 +25,9 @@ COPY package*.json ./
 # Install production dependencies only
 RUN npm ci --only=production
 
+# Copy tsconfig.json for tsconfig-paths runtime resolution
+COPY tsconfig.json ./
+
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
 
