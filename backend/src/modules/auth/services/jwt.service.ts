@@ -52,11 +52,11 @@ export class JwtService {
       jti: tokenId,
     };
 
-    const privateKey = this.configService.get<string>('JWT_PRIVATE_KEY');
+    const secret = this.configService.get<string>('JWT_SECRET');
 
     return this.nestJwtService.sign(payload, {
-      algorithm: 'RS256',
-      privateKey,
+      algorithm: 'HS256',
+      secret,
       issuer: this.issuer,
       audience: this.audience,
     });
@@ -77,11 +77,11 @@ export class JwtService {
       jti: tokenId,
     };
 
-    const privateKey = this.configService.get<string>('JWT_PRIVATE_KEY');
+    const secret = this.configService.get<string>('REFRESH_TOKEN_SECRET');
 
     const refreshToken = this.nestJwtService.sign(payload, {
-      algorithm: 'RS256',
-      privateKey,
+      algorithm: 'HS256',
+      secret,
       issuer: this.issuer,
       audience: this.audience,
     });
@@ -97,11 +97,11 @@ export class JwtService {
    */
   async verifyToken(token: string): Promise<JwtPayload> {
     try {
-      const publicKey = this.configService.get<string>('JWT_PUBLIC_KEY');
+      const secret = this.configService.get<string>('JWT_SECRET');
 
       const payload = this.nestJwtService.verify(token, {
-        algorithms: ['RS256'],
-        publicKey,
+        algorithms: ['HS256'],
+        secret,
         issuer: this.issuer,
         audience: this.audience,
       }) as JwtPayload;

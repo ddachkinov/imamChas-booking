@@ -15,8 +15,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: configService.get<string>('JWT_PUBLIC_KEY'),
-      algorithms: ['RS256'],
+      secretOrKey: configService.get<string>('JWT_SECRET'),
+      algorithms: ['HS256'],
       issuer: configService.get<string>('JWT_ISSUER', 'booking-platform'),
       audience: configService.get<string>('JWT_AUDIENCE', 'booking-platform-api'),
       passReqToCallback: false,
