@@ -24,10 +24,10 @@ import {
 } from '../types/calendar-responses';
 import { CalendarViewDto, CalendarViewType } from '../dto/calendar-view.dto';
 import * as dayjs from 'dayjs';
-import * as utc from 'dayjs/plugin/utc';
-import * as timezone from 'dayjs/plugin/timezone';
-import * as isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import * as isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);

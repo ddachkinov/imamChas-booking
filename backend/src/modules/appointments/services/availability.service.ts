@@ -9,8 +9,8 @@ import { Availability, AvailabilityType } from '../../staff/entities/availabilit
 import { Location } from '../../locations/entities/location.entity';
 import { CheckAvailabilityDto, AvailableSlot } from '../dto/check-availability.dto';
 import * as dayjs from 'dayjs';
-import * as utc from 'dayjs/plugin/utc';
-import * as timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);

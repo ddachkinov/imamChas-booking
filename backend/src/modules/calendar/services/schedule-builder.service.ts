@@ -6,7 +6,7 @@ import { StaffMember } from '../../staff/entities/staff-member.entity';
 import { Availability } from '../../staff/entities/availability.entity';
 import { ScheduleSummary } from '../types/calendar-responses';
 import * as dayjs from 'dayjs';
-import * as duration from 'dayjs/plugin/duration';
+import duration from 'dayjs/plugin/duration';
 
 dayjs.extend(duration);
 
