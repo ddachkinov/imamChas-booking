@@ -22,17 +22,17 @@ async function seed() {
     const userRoleRepo = AppDataSource.getRepository(UserRole);
 
     // Check if seed data already exists
-    const existingTenant = await tenantRepo.findOne({ where: { slug: 'default' } });
+    const existingTenant = await tenantRepo.findOne({ where: { slug: 'demo' } });
     if (existingTenant) {
       console.log('ℹ️  Seed data already exists. Skipping...');
       await AppDataSource.destroy();
       return;
     }
 
-    console.log('📝 Creating default tenant...');
+    console.log('📝 Creating demo tenant...');
     const tenant = await tenantRepo.save({
-      slug: 'default',
-      name: 'Default Tenant',
+      slug: 'demo',
+      name: 'Demo Booking Platform',
       subscription_tier: SubscriptionTier.PROFESSIONAL,
       subscription_status: SubscriptionStatus.ACTIVE,
       subscription_started_at: new Date(),
@@ -246,10 +246,10 @@ async function seed() {
 
     const adminUser = await userRepo.save({
       tenant_id: tenant.id,
-      email: 'admin@booking.local',
+      email: 'admin@demo.ic-booking.groundpoint.net',
       password_hash: passwordHash,
-      first_name: 'Admin',
-      last_name: 'User',
+      first_name: 'Demo',
+      last_name: 'Admin',
       email_verified: true,
       status: UserStatus.ACTIVE,
       language: 'en',
@@ -273,7 +273,7 @@ async function seed() {
     console.log('✅ ================================');
     console.log('');
     console.log('📧 Admin Login Credentials:');
-    console.log(`   Email:    admin@booking.local`);
+    console.log(`   Email:    admin@demo.ic-booking.groundpoint.net`);
     console.log(`   Password: Admin123!`);
     console.log('');
     console.log(`🏢 Default Tenant: ${tenant.name} (${tenant.slug})`);
