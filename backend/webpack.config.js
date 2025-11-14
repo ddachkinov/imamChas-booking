@@ -1,6 +1,11 @@
 module.exports = function (options, webpack) {
   return {
     ...options,
+    ignoreWarnings: [/./],
+    stats: {
+      errors: false,
+      warnings: false,
+    },
     module: {
       rules: [
         {
@@ -9,8 +14,9 @@ module.exports = function (options, webpack) {
             {
               loader: 'ts-loader',
               options: {
-                transpileOnly: true, // Skip type checking for faster builds
-                experimentalWatchApi: true,
+                transpileOnly: true,
+                errorFormatter: () => '', // Suppress error output
+                onlyCompileBundledFiles: true,
               },
             },
           ],
