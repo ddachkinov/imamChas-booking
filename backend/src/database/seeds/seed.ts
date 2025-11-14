@@ -1,8 +1,8 @@
 import { AppDataSource } from '../data-source';
 import { Tenant, SubscriptionTier, SubscriptionStatus } from '../../modules/tenants/entities/tenant.entity';
-import { User, UserStatus } from '../../modules/users/entities/user.entity';
-import { Role, RoleScope } from '../../modules/users/entities/role.entity';
-import { Permission, PermissionScope } from '../../modules/users/entities/permission.entity';
+import { User } from '../../modules/users/entities/user.entity';
+import { Role } from '../../modules/users/entities/role.entity';
+import { Permission } from '../../modules/users/entities/permission.entity';
 import { RolePermission } from '../../modules/users/entities/role-permission.entity';
 import { UserRole } from '../../modules/users/entities/user-role.entity';
 import * as argon2 from 'argon2';
@@ -32,17 +32,11 @@ async function seed() {
     console.log('📝 Creating demo tenant...');
     const tenant = await tenantRepo.save({
       slug: 'demo',
+      subdomain: 'demo',
       name: 'Demo Booking Platform',
       subscription_tier: SubscriptionTier.PROFESSIONAL,
       subscription_status: SubscriptionStatus.ACTIVE,
       subscription_starts_at: new Date(),
-      feature_flags: {
-        appointments: true,
-        calendar_sync: true,
-        payments: true,
-        notifications: true,
-        analytics: true,
-      },
       settings: {
         timezone: 'UTC',
         language: 'en',
@@ -58,42 +52,36 @@ async function seed() {
         name: 'Super Admin',
         description: 'Full system access',
         is_system_role: true,
-        scope: RoleScope.TENANT,
       },
       {
         tenant_id: tenant.id,
         name: 'Tenant Admin',
         description: 'Tenant administration',
         is_system_role: true,
-        scope: RoleScope.TENANT,
       },
       {
         tenant_id: tenant.id,
         name: 'Business Owner',
         description: 'Business owner with full business access',
         is_system_role: true,
-        scope: RoleScope.BUSINESS,
       },
       {
         tenant_id: tenant.id,
         name: 'Manager',
         description: 'Business manager with limited access',
         is_system_role: true,
-        scope: RoleScope.BUSINESS,
       },
       {
         tenant_id: tenant.id,
         name: 'Staff',
         description: 'Staff member',
         is_system_role: true,
-        scope: RoleScope.LOCATION,
       },
       {
         tenant_id: tenant.id,
         name: 'Client',
         description: 'End customer/client',
         is_system_role: true,
-        scope: RoleScope.TENANT,
       },
     ]);
     console.log(`✅ Created ${roles.length} system roles`);
@@ -101,75 +89,29 @@ async function seed() {
     console.log('📝 Creating system permissions...');
     const permissionData = [
       // User management
-      { resource: 'user', action: 'create', scope: PermissionScope.TENANT, description: 'Create users' },
-      { resource: 'user', action: 'read', scope: PermissionScope.TENANT, description: 'View users' },
-      { resource: 'user', action: 'update', scope: PermissionScope.TENANT, description: 'Update users' },
-      { resource: 'user', action: 'delete', scope: PermissionScope.TENANT, description: 'Delete users' },
-      { resource: 'user', action: 'read', scope: PermissionScope.OWN, description: 'View own profile' },
-      { resource: 'user', action: 'update', scope: PermissionScope.OWN, description: 'Update own profile' },
+      { name: 'user:create', resource: 'user', action: 'create', description: 'Create users' },
+      { name: 'user:read', resource: 'user', action: 'read', description: 'View users' },
+      { name: 'user:update', resource: 'user', action: 'update', description: 'Update users' },
+      { name: 'user:delete', resource: 'user', action: 'delete', description: 'Delete users' },
 
       // Business management
-      { resource: 'business', action: 'create', scope: PermissionScope.TENANT, description: 'Create businesses' },
-      { resource: 'business', action: 'read', scope: PermissionScope.TENANT, description: 'View businesses' },
-      { resource: 'business', action: 'update', scope: PermissionScope.BUSINESS, description: 'Update business' },
-      { resource: 'business', action: 'delete', scope: PermissionScope.BUSINESS, description: 'Delete business' },
-
-      // Location management
-      { resource: 'location', action: 'create', scope: PermissionScope.BUSINESS, description: 'Create locations' },
-      { resource: 'location', action: 'read', scope: PermissionScope.BUSINESS, description: 'View locations' },
-      { resource: 'location', action: 'update', scope: PermissionScope.LOCATION, description: 'Update location' },
-      { resource: 'location', action: 'delete', scope: PermissionScope.LOCATION, description: 'Delete location' },
-
-      // Service management
-      { resource: 'service', action: 'create', scope: PermissionScope.BUSINESS, description: 'Create services' },
-      { resource: 'service', action: 'read', scope: PermissionScope.BUSINESS, description: 'View services' },
-      { resource: 'service', action: 'update', scope: PermissionScope.BUSINESS, description: 'Update services' },
-      { resource: 'service', action: 'delete', scope: PermissionScope.BUSINESS, description: 'Delete services' },
-
-      // Staff management
-      { resource: 'staff', action: 'create', scope: PermissionScope.BUSINESS, description: 'Add staff' },
-      { resource: 'staff', action: 'read', scope: PermissionScope.BUSINESS, description: 'View staff' },
-      { resource: 'staff', action: 'update', scope: PermissionScope.BUSINESS, description: 'Update staff' },
-      { resource: 'staff', action: 'delete', scope: PermissionScope.BUSINESS, description: 'Remove staff' },
-
-      // Client management
-      { resource: 'client', action: 'create', scope: PermissionScope.BUSINESS, description: 'Add clients' },
-      { resource: 'client', action: 'read', scope: PermissionScope.BUSINESS, description: 'View clients' },
-      { resource: 'client', action: 'update', scope: PermissionScope.BUSINESS, description: 'Update clients' },
-      { resource: 'client', action: 'delete', scope: PermissionScope.BUSINESS, description: 'Delete clients' },
+      { name: 'business:create', resource: 'business', action: 'create', description: 'Create businesses' },
+      { name: 'business:read', resource: 'business', action: 'read', description: 'View businesses' },
+      { name: 'business:update', resource: 'business', action: 'update', description: 'Update business' },
+      { name: 'business:delete', resource: 'business', action: 'delete', description: 'Delete business' },
 
       // Appointment management
-      { resource: 'appointment', action: 'create', scope: PermissionScope.BUSINESS, description: 'Book appointments' },
-      { resource: 'appointment', action: 'read', scope: PermissionScope.BUSINESS, description: 'View appointments' },
-      { resource: 'appointment', action: 'update', scope: PermissionScope.BUSINESS, description: 'Update appointments' },
-      { resource: 'appointment', action: 'delete', scope: PermissionScope.BUSINESS, description: 'Cancel appointments' },
-      { resource: 'appointment', action: 'read', scope: PermissionScope.OWN, description: 'View own appointments' },
-      { resource: 'appointment', action: 'create', scope: PermissionScope.OWN, description: 'Book own appointments' },
-      { resource: 'appointment', action: 'delete', scope: PermissionScope.OWN, description: 'Cancel own appointments' },
-
-      // Calendar management
-      { resource: 'calendar', action: 'read', scope: PermissionScope.BUSINESS, description: 'View calendar' },
-      { resource: 'calendar', action: 'update', scope: PermissionScope.BUSINESS, description: 'Manage calendar' },
+      { name: 'appointment:create', resource: 'appointment', action: 'create', description: 'Book appointments' },
+      { name: 'appointment:read', resource: 'appointment', action: 'read', description: 'View appointments' },
+      { name: 'appointment:update', resource: 'appointment', action: 'update', description: 'Update appointments' },
+      { name: 'appointment:delete', resource: 'appointment', action: 'delete', description: 'Cancel appointments' },
 
       // Payment management
-      { resource: 'payment', action: 'create', scope: PermissionScope.BUSINESS, description: 'Process payments' },
-      { resource: 'payment', action: 'read', scope: PermissionScope.BUSINESS, description: 'View payments' },
-      { resource: 'payment', action: 'update', scope: PermissionScope.BUSINESS, description: 'Update payments' },
-
-      // Analytics
-      { resource: 'analytics', action: 'read', scope: PermissionScope.BUSINESS, description: 'View analytics' },
-
-      // Settings
-      { resource: 'settings', action: 'read', scope: PermissionScope.BUSINESS, description: 'View settings' },
-      { resource: 'settings', action: 'update', scope: PermissionScope.BUSINESS, description: 'Update settings' },
+      { name: 'payment:create', resource: 'payment', action: 'create', description: 'Process payments' },
+      { name: 'payment:read', resource: 'payment', action: 'read', description: 'View payments' },
     ];
 
-    const permissions = await permissionRepo.save(
-      permissionData.map(p => ({
-        ...p,
-        is_system_permission: true,
-      })),
-    );
+    const permissions = await permissionRepo.save(permissionData);
     console.log(`✅ Created ${permissions.length} system permissions`);
 
     console.log('📝 Assigning permissions to roles...');
@@ -183,53 +125,11 @@ async function seed() {
       })),
     );
 
-    // Tenant Admin gets most permissions (excluding super admin specific ones)
+    // Tenant Admin gets most permissions
     const tenantAdminRole = roles.find(r => r.name === 'Tenant Admin');
-    const tenantAdminPermissions = permissions.filter(
-      p => !['user:delete:tenant'].includes(`${p.resource}:${p.action}:${p.scope}`),
-    );
     await rolePermissionRepo.save(
-      tenantAdminPermissions.map(p => ({
+      permissions.map(p => ({
         role_id: tenantAdminRole.id,
-        permission_id: p.id,
-      })),
-    );
-
-    // Business Owner gets business-scoped permissions
-    const businessOwnerRole = roles.find(r => r.name === 'Business Owner');
-    const businessOwnerPermissions = permissions.filter(
-      p => p.scope === PermissionScope.BUSINESS || p.scope === PermissionScope.LOCATION,
-    );
-    await rolePermissionRepo.save(
-      businessOwnerPermissions.map(p => ({
-        role_id: businessOwnerRole.id,
-        permission_id: p.id,
-      })),
-    );
-
-    // Staff gets limited permissions
-    const staffRole = roles.find(r => r.name === 'Staff');
-    const staffPermissions = permissions.filter(
-      p => p.resource === 'appointment' && (p.action === 'read' || p.action === 'create' || p.action === 'update') &&
-           (p.scope === PermissionScope.LOCATION || p.scope === PermissionScope.BUSINESS) ||
-           p.resource === 'calendar' && p.action === 'read' ||
-           p.resource === 'client' && (p.action === 'read' || p.action === 'create'),
-    );
-    await rolePermissionRepo.save(
-      staffPermissions.map(p => ({
-        role_id: staffRole.id,
-        permission_id: p.id,
-      })),
-    );
-
-    // Client gets only own permissions
-    const clientRole = roles.find(r => r.name === 'Client');
-    const clientPermissions = permissions.filter(
-      p => p.scope === PermissionScope.OWN,
-    );
-    await rolePermissionRepo.save(
-      clientPermissions.map(p => ({
-        role_id: clientRole.id,
         permission_id: p.id,
       })),
     );
@@ -251,8 +151,8 @@ async function seed() {
       first_name: 'Demo',
       last_name: 'Admin',
       email_verified: true,
-      status: UserStatus.ACTIVE,
-      language: 'en',
+      is_active: true,
+      locale: 'en',
       timezone: 'UTC',
     });
     console.log(`✅ Created admin user: ${adminUser.email}`);
@@ -261,9 +161,6 @@ async function seed() {
     await userRoleRepo.save({
       user_id: adminUser.id,
       role_id: superAdminRole.id,
-      scope_type: RoleScope.TENANT,
-      scope_id: null,
-      granted_by: adminUser.id,
     });
     console.log('✅ Assigned Super Admin role');
 
