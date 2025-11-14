@@ -60,10 +60,10 @@ export class Tenant {
   subscription_status: SubscriptionStatus;
 
   @Column({ type: 'timestamp', nullable: true })
-  subscription_started_at: Date;
+  subscription_starts_at: Date;
 
   @Column({ type: 'timestamp', nullable: true })
-  subscription_expires_at: Date;
+  subscription_ends_at: Date;
 
   @Column({ type: 'jsonb', default: {} })
   feature_flags: Record<string, boolean>;

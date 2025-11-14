@@ -35,7 +35,7 @@ async function seed() {
       name: 'Demo Booking Platform',
       subscription_tier: SubscriptionTier.PROFESSIONAL,
       subscription_status: SubscriptionStatus.ACTIVE,
-      subscription_started_at: new Date(),
+      subscription_starts_at: new Date(),
       feature_flags: {
         appointments: true,
         calendar_sync: true,
