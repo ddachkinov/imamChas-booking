@@ -26,7 +26,7 @@ import { TenantsModule } from '../tenants/tenants.module';
         publicKey: configService.get<string>('JWT_PUBLIC_KEY'),
         signOptions: {
           algorithm: 'RS256',
-          expiresIn: configService.get<string>('JWT_ACCESS_TOKEN_EXPIRY', '3600s'),
+          // Note: expiresIn removed from global config as we manually set exp in payload
           issuer: configService.get<string>('JWT_ISSUER', 'booking-platform'),
           audience: configService.get<string>('JWT_AUDIENCE', 'booking-platform-api'),
         },
