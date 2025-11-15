@@ -41,6 +41,9 @@ export class StaffMember {
   @Column('uuid', { nullable: true })
   location_id: string;
 
+  @Column()
+  display_name: string;
+
   @Column({ nullable: true })
   title: string;
 
@@ -48,16 +51,13 @@ export class StaffMember {
   bio: string;
 
   @Column({ nullable: true })
-  photo_url: string;
+  profile_image_url: string;
 
   @Column({ nullable: true })
-  calendar_color: string;
+  phone: string;
 
-  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
-  commission_rate: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  hourly_rate: number;
+  @Column({ nullable: true })
+  email: string;
 
   @Column({
     type: 'enum',
