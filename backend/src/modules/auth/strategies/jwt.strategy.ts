@@ -37,7 +37,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     }
 
     // Check if user is active
-    if (user.status !== 'active' && user.status !== 'pending_verification') {
+    if (!user.is_active) {
       throw new UnauthorizedException('User account is not active');
     }
 
