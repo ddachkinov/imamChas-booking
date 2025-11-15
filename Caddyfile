@@ -12,8 +12,8 @@ api.{$MAIN_DOMAIN} {
     reverse_proxy backend:3000
 }
 
-# Wildcard for tenant subdomains - Frontend
-*.{$MAIN_DOMAIN} {
+# Demo tenant subdomain - Frontend
+demo.{$MAIN_DOMAIN} {
     # For API calls from tenant subdomains
     @api path /api/*
     handle @api {
