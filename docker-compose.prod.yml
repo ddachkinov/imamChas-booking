@@ -11,6 +11,7 @@ services:
       - "443:443/udp"  # HTTP/3
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./landing:/var/www/landing:ro
       - caddy_data:/data
       - caddy_config:/config
     networks:

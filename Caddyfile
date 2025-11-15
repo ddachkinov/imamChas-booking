@@ -2,9 +2,14 @@
     email {$ACME_EMAIL}
 }
 
-# Main domain - Frontend
+# Main domain - Marketing Landing Page
 {$MAIN_DOMAIN} {
-    reverse_proxy frontend:80
+    root * /var/www/landing
+    encode gzip
+    file_server
+
+    # Handle 404s by serving index.html
+    try_files {path} /index.html
 }
 
 # API subdomain - Backend
