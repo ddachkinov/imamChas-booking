@@ -14,6 +14,7 @@ import { PasswordResetToken } from './entities/password-reset-token.entity';
 import { EmailVerificationToken } from './entities/email-verification-token.entity';
 import { UsersModule } from '../users/users.module';
 import { TenantsModule } from '../tenants/tenants.module';
+import { StaffMember } from '../staff/entities/staff-member.entity';
 
 @Module({
   imports: [
@@ -32,7 +33,7 @@ import { TenantsModule } from '../tenants/tenants.module';
         },
       }),
     }),
-    TypeOrmModule.forFeature([PasswordResetToken, EmailVerificationToken]),
+    TypeOrmModule.forFeature([PasswordResetToken, EmailVerificationToken, StaffMember]),
     UsersModule,
     TenantsModule,
   ],
