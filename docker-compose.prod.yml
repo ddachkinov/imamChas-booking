@@ -125,8 +125,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: https://api.${MAIN_DOMAIN}
-        VITE_WS_URL: wss://api.${MAIN_DOMAIN}
+        VITE_API_URL: https://api.${MAIN_DOMAIN}/api
+        VITE_WS_URL: wss://api.${MAIN_DOMAIN}/api
         VITE_STRIPE_PUBLIC_KEY: ${STRIPE_PUBLIC_KEY}
         VITE_SENTRY_DSN: ${VITE_SENTRY_DSN}
         VITE_ENABLE_ANALYTICS: ${VITE_ENABLE_ANALYTICS:-true}
