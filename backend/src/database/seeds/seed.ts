@@ -5,6 +5,8 @@ import { Role } from '../../modules/users/entities/role.entity';
 import { Permission } from '../../modules/users/entities/permission.entity';
 import { RolePermission } from '../../modules/users/entities/role-permission.entity';
 import { UserRole } from '../../modules/users/entities/user-role.entity';
+import { Business, BusinessStatus } from '../../modules/businesses/entities/business.entity';
+import { StaffMember, StaffStatus } from '../../modules/staff/entities/staff-member.entity';
 import * as argon2 from 'argon2';
 
 async function seed() {
@@ -20,6 +22,8 @@ async function seed() {
     const permissionRepo = AppDataSource.getRepository(Permission);
     const rolePermissionRepo = AppDataSource.getRepository(RolePermission);
     const userRoleRepo = AppDataSource.getRepository(UserRole);
+    const businessRepo = AppDataSource.getRepository(Business);
+    const staffMemberRepo = AppDataSource.getRepository(StaffMember);
 
     // Check if seed data already exists
     const existingTenant = await tenantRepo.findOne({ where: { slug: 'demo' } });
@@ -164,6 +168,34 @@ async function seed() {
     });
     console.log('✅ Assigned Super Admin role');
 
+    console.log('📝 Creating demo business...');
+    const business = await businessRepo.save({
+      tenant_id: tenant.id,
+      name: 'Demo Business',
+      description: 'A demo business for testing the booking platform',
+      currency: 'USD',
+      default_timezone: 'UTC',
+      status: BusinessStatus.ACTIVE,
+      booking_policy: {
+        cancellation_hours: 24,
+        min_advance_booking_hours: 2,
+        max_advance_booking_days: 90,
+        requires_approval: false,
+      },
+    });
+    console.log(`✅ Created business: ${business.name}`);
+
+    console.log('📝 Linking admin user to business as staff member...');
+    const staffMember = await staffMemberRepo.save({
+      tenant_id: tenant.id,
+      user_id: adminUser.id,
+      business_id: business.id,
+      title: 'Owner',
+      status: StaffStatus.ACTIVE,
+      accepts_online_bookings: true,
+    });
+    console.log('✅ Admin user linked to business');
+
     console.log('');
     console.log('✅ ================================');
     console.log('✅ Seeding completed successfully!');
@@ -174,6 +206,7 @@ async function seed() {
     console.log(`   Password: Admin123!`);
     console.log('');
     console.log(`🏢 Default Tenant: ${tenant.name} (${tenant.slug})`);
+    console.log(`🏪 Default Business: ${business.name}`);
     console.log(`👥 Roles Created: ${roles.length}`);
     console.log(`🔐 Permissions Created: ${permissions.length}`);
     console.log('');

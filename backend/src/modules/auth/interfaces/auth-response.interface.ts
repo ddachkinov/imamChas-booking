@@ -9,6 +9,10 @@ export interface AuthResponse {
     first_name: string;
     last_name: string;
     email_verified: boolean;
+    tenant_id: string;
+    business_id: string | null;
+    role: string;
+    permissions: string[];
   };
 }
 

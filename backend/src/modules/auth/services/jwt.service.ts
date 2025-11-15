@@ -195,11 +195,15 @@ export class JwtService {
     tenant: Tenant,
     roles: any[] = [],
     permissions: string[] = [],
+    businessId: string | null = null,
   ): Promise<AuthResponse> {
     const [accessToken, refreshToken] = await Promise.all([
       this.generateAccessToken(user, tenant, roles, permissions),
       this.generateRefreshToken(user, tenant),
     ]);
+
+    // Determine primary role from roles array
+    const primaryRole = roles.length > 0 ? roles[0].name : 'User';
 
     return {
       access_token: accessToken,
@@ -212,6 +216,10 @@ export class JwtService {
         first_name: user.first_name,
         last_name: user.last_name,
         email_verified: user.email_verified,
+        tenant_id: tenant.id,
+        business_id: businessId,
+        role: primaryRole,
+        permissions,
       },
     };
   }

@@ -18,6 +18,7 @@ import { TenantsService } from '../../tenants/tenants.service';
 import { User, UserStatus } from '../../users/entities/user.entity';
 import { PasswordResetToken } from '../entities/password-reset-token.entity';
 import { EmailVerificationToken } from '../entities/email-verification-token.entity';
+import { StaffMember } from '../../staff/entities/staff-member.entity';
 
 @Injectable()
 export class AuthService {
@@ -33,6 +34,8 @@ export class AuthService {
     private readonly passwordResetTokenRepository: Repository<PasswordResetToken>,
     @InjectRepository(EmailVerificationToken)
     private readonly emailVerificationTokenRepository: Repository<EmailVerificationToken>,
+    @InjectRepository(StaffMember)
+    private readonly staffMemberRepository: Repository<StaffMember>,
     @Inject('REDIS_CLIENT') private readonly redisClient: Redis,
   ) {}
 
@@ -152,9 +155,15 @@ export class AuthService {
     // Update last login
     await this.usersService.updateLastLogin(user.id);
 
+    // Get user's business_id if they are a staff member
+    const staffMember = await this.staffMemberRepository.findOne({
+      where: { user_id: user.id },
+    });
+    const businessId = staffMember?.business_id || null;
+
     // Generate JWT tokens
     const permissions = await this.usersService.getUserPermissions(user.id);
-    return this.jwtService.generateTokenPair(user, tenant, user.userRoles || [], permissions);
+    return this.jwtService.generateTokenPair(user, tenant, user.userRoles || [], permissions, businessId);
   }
 
   /**
@@ -188,9 +197,15 @@ export class AuthService {
     // Delete old refresh token (token rotation)
     await this.jwtService.deleteRefreshToken(payload.user_id, payload.jti);
 
+    // Get user's business_id if they are a staff member
+    const staffMember = await this.staffMemberRepository.findOne({
+      where: { user_id: user.id },
+    });
+    const businessId = staffMember?.business_id || null;
+
     // Generate new token pair
     const permissions = await this.usersService.getUserPermissions(user.id);
-    return this.jwtService.generateTokenPair(user, tenant, user.userRoles || [], permissions);
+    return this.jwtService.generateTokenPair(user, tenant, user.userRoles || [], permissions, businessId);
   }
 
   /**
