@@ -83,6 +83,19 @@ export class AuthService {
   }
 
   /**
+   * Login user by tenant slug
+   */
+  async loginBySlug(loginDto: LoginDto, tenantSlug: string): Promise<AuthResponse> {
+    // Get tenant by slug
+    const tenant = await this.tenantsService.findBySlug(tenantSlug);
+    if (!tenant) {
+      throw new UnauthorizedException('Tenant not found');
+    }
+
+    return this.login(loginDto, tenant.id);
+  }
+
+  /**
    * Login user
    */
   async login(loginDto: LoginDto, tenantId: string): Promise<AuthResponse> {
