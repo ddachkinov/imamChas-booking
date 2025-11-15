@@ -11,6 +11,9 @@ import { useToastStore } from '@/hooks/useToast';
 const BookingPage = lazy(() => import('@/pages/booking/BookingPage').then(m => ({ default: m.BookingPage })));
 const BookingBySlugPage = lazy(() => import('@/pages/booking/BookingBySlugPage').then(m => ({ default: m.BookingBySlugPage })));
 
+// Lazy-loaded auth pages
+const LoginPage = lazy(() => import('@/pages/auth/LoginPage').then(m => ({ default: m.LoginPage })));
+
 // Loading fallback component
 const PageLoader = () => (
   <div className="flex items-center justify-center h-screen">
@@ -41,6 +44,16 @@ function App() {
             {/* Redirect root to admin dashboard */}
             <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
 
+            {/* Auth routes */}
+            <Route
+              path="/admin/login"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <LoginPage />
+                </Suspense>
+              }
+            />
+
             {/* Admin routes */}
             <Route path="/admin/*" element={<AdminRoutes />} />
 
@@ -61,8 +74,6 @@ function App() {
                 </Suspense>
               }
             />
-
-            {/* TODO: Add login/register routes */}
           </Routes>
         </BrowserRouter>
 
