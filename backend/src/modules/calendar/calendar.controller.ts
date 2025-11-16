@@ -99,7 +99,7 @@ export class CalendarController {
     @Query() query: CalendarViewDto,
   ): Promise<DayViewResponse> {
     const tenantId = req.user.tenantId;
-    query.view_type = 'day' as any;
+    query.view = 'day' as any;
 
     return this.calendarService.getDayView(tenantId, query);
   }
@@ -119,7 +119,7 @@ export class CalendarController {
     @Query() query: CalendarViewDto,
   ): Promise<WeekViewResponse> {
     const tenantId = req.user.tenantId;
-    query.view_type = 'week' as any;
+    query.view = 'week' as any;
 
     return this.calendarService.getWeekView(tenantId, query);
   }
@@ -139,7 +139,7 @@ export class CalendarController {
     @Query() query: CalendarViewDto,
   ): Promise<MonthViewResponse> {
     const tenantId = req.user.tenantId;
-    query.view_type = 'month' as any;
+    query.view = 'month' as any;
 
     return this.calendarService.getMonthView(tenantId, query);
   }
@@ -159,7 +159,7 @@ export class CalendarController {
     @Query() query: CalendarViewDto,
   ): Promise<ResourceViewResponse> {
     const tenantId = req.user.tenantId;
-    query.view_type = 'resource' as any;
+    query.view = 'resource' as any;
 
     return this.calendarService.getResourceView(tenantId, query);
   }

@@ -58,7 +58,7 @@ export class CalendarService {
     tenantId: string,
     dto: CalendarViewDto,
   ): Promise<DayViewResponse | WeekViewResponse | MonthViewResponse | ResourceViewResponse> {
-    switch (dto.view_type) {
+    switch (dto.view) {
       case CalendarViewType.DAY:
         return this.getDayView(tenantId, dto);
       case CalendarViewType.WEEK:
@@ -68,7 +68,7 @@ export class CalendarService {
       case CalendarViewType.RESOURCE:
         return this.getResourceView(tenantId, dto);
       default:
-        throw new Error(`Unsupported view type: ${dto.view_type}`);
+        throw new Error(`Unsupported view type: ${dto.view}`);
     }
   }
 
@@ -77,7 +77,7 @@ export class CalendarService {
    */
   async getDayView(tenantId: string, dto: CalendarViewDto): Promise<DayViewResponse> {
     const tz = dto.timezone || 'UTC';
-    const date = dayjs(dto.date).tz(tz);
+    const date = dayjs(dto.start_date).tz(tz);
 
     // Get staff member (use first from filter or find default)
     const staffId = dto.staff_member_ids?.[0];
@@ -177,7 +177,7 @@ export class CalendarService {
    */
   async getWeekView(tenantId: string, dto: CalendarViewDto): Promise<WeekViewResponse> {
     const tz = dto.timezone || 'UTC';
-    const startDate = dayjs(dto.date).tz(tz).startOf('week').add(1, 'day'); // Monday
+    const startDate = dayjs(dto.start_date).tz(tz).startOf('week').add(1, 'day'); // Monday
     const endDate = startDate.add(6, 'day'); // Sunday
 
     const days: DayColumn[] = [];
@@ -249,7 +249,7 @@ export class CalendarService {
    */
   async getMonthView(tenantId: string, dto: CalendarViewDto): Promise<MonthViewResponse> {
     const tz = dto.timezone || 'UTC';
-    const date = dayjs(dto.date).tz(tz);
+    const date = dayjs(dto.start_date).tz(tz);
     const year = date.year();
     const month = date.month() + 1; // 1-12
 
@@ -326,7 +326,7 @@ export class CalendarService {
    */
   async getResourceView(tenantId: string, dto: CalendarViewDto): Promise<ResourceViewResponse> {
     const tz = dto.timezone || 'UTC';
-    const startTime = dayjs(dto.date).tz(tz);
+    const startTime = dayjs(dto.start_date).tz(tz);
     const endTime = dto.end_date ? dayjs(dto.end_date).tz(tz) : startTime.endOf('day');
 
     if (!dto.staff_member_ids?.length) {
