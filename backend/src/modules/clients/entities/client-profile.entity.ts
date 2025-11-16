@@ -5,7 +5,6 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
-  DeleteDateColumn,
   Index,
   JoinColumn,
 } from 'typeorm';
@@ -104,9 +103,6 @@ export class ClientProfile {
 
   @UpdateDateColumn()
   updated_at: Date;
-
-  @DeleteDateColumn()
-  deleted_at: Date;
 
   @ManyToOne(() => Tenant)
   @JoinColumn({ name: 'tenant_id' })
