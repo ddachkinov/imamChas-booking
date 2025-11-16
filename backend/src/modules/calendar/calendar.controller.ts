@@ -49,6 +49,24 @@ export class CalendarController {
   ) {}
 
   /**
+   * Get calendar data - root endpoint that routes based on view parameter
+   */
+  @Get()
+  @ApiOperation({ summary: 'Get calendar data' })
+  @ApiResponse({
+    status: 200,
+    description: 'Calendar data retrieved',
+  })
+  async getCalendarData(
+    @Request() req,
+    @Query() query: CalendarViewDto,
+  ): Promise<DayViewResponse | WeekViewResponse | MonthViewResponse | ResourceViewResponse> {
+    const tenantId = req.user.tenantId;
+
+    return this.calendarService.getCalendarView(tenantId, query);
+  }
+
+  /**
    * Get calendar view (day, week, month, or resource)
    */
   @Get('view')
