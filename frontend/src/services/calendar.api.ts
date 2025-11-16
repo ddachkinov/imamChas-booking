@@ -52,21 +52,23 @@ export const calendarApi = {
     }
 
     const response = await apiService.get<CalendarData>(`/calendar?${queryParams.toString()}`);
-    return response;
+    return response.data;
   },
 
   /**
    * Get single appointment details
    */
   async getAppointment(appointmentId: string): Promise<CalendarAppointment> {
-    return await apiService.get<CalendarAppointment>(`/appointments/${appointmentId}`);
+    const response = await apiService.get<CalendarAppointment>(`/appointments/${appointmentId}`);
+    return response.data;
   },
 
   /**
    * Create new appointment
    */
   async createAppointment(data: AppointmentFormData): Promise<CalendarAppointment> {
-    return await apiService.post<CalendarAppointment>('/appointments', data);
+    const response = await apiService.post<CalendarAppointment>('/appointments', data);
+    return response.data;
   },
 
   /**
@@ -78,7 +80,8 @@ export const calendarApi = {
       status: 'confirmed',
       send_confirmation: true,
     };
-    return await apiService.post<CalendarAppointment>('/appointments', formData);
+    const response = await apiService.post<CalendarAppointment>('/appointments', formData);
+    return response.data;
   },
 
   /**
@@ -88,14 +91,15 @@ export const calendarApi = {
     appointmentId: string,
     data: Partial<AppointmentFormData>
   ): Promise<CalendarAppointment> {
-    return await apiService.put<CalendarAppointment>(`/appointments/${appointmentId}`, data);
+    const response = await apiService.put<CalendarAppointment>(`/appointments/${appointmentId}`, data);
+    return response.data;
   },
 
   /**
    * Reschedule appointment
    */
   async rescheduleAppointment(request: RescheduleRequest): Promise<CalendarAppointment> {
-    return await apiService.put<CalendarAppointment>(
+    const response = await apiService.put<CalendarAppointment>(
       `/appointments/${request.appointment_id}/reschedule`,
       {
         new_date: request.new_date,
@@ -105,19 +109,21 @@ export const calendarApi = {
         reason: request.reason,
       }
     );
+    return response.data;
   },
 
   /**
    * Update appointment status
    */
   async updateAppointmentStatus(request: StatusUpdateRequest): Promise<CalendarAppointment> {
-    return await apiService.put<CalendarAppointment>(
+    const response = await apiService.put<CalendarAppointment>(
       `/appointments/${request.appointment_id}/status`,
       {
         status: request.status,
         notes: request.notes,
       }
     );
+    return response.data;
   },
 
   /**
@@ -128,10 +134,11 @@ export const calendarApi = {
     reason?: string,
     sendNotification: boolean = true
   ): Promise<CalendarAppointment> {
-    return await apiService.put<CalendarAppointment>(`/appointments/${appointmentId}/cancel`, {
+    const response = await apiService.put<CalendarAppointment>(`/appointments/${appointmentId}/cancel`, {
       reason,
       send_notification: sendNotification,
     });
+    return response.data;
   },
 
   /**
@@ -164,9 +171,10 @@ export const calendarApi = {
       queryParams.append('exclude_appointment_id', params.excludeAppointmentId);
     }
 
-    return await apiService.get<AppointmentConflict>(
+    const response = await apiService.get<AppointmentConflict>(
       `/appointments/check-conflicts?${queryParams.toString()}`
     );
+    return response.data;
   },
 
   /**
@@ -190,9 +198,10 @@ export const calendarApi = {
       queryParams.append('end_date', params.endDate);
     }
 
-    return await apiService.get<CalendarAppointment[]>(
+    const response = await apiService.get<CalendarAppointment[]>(
       `/appointments/search?${queryParams.toString()}`
     );
+    return response.data;
   },
 
   /**
@@ -214,21 +223,24 @@ export const calendarApi = {
       queryParams.append('staff_id', params.staffId);
     }
 
-    return await apiService.get<BlockedTime[]>(`/blocked-time?${queryParams.toString()}`);
+    const response = await apiService.get<BlockedTime[]>(`/blocked-time?${queryParams.toString()}`);
+    return response.data;
   },
 
   /**
    * Create blocked time
    */
   async createBlockedTime(data: BlockedTimeFormData): Promise<BlockedTime> {
-    return await apiService.post<BlockedTime>('/blocked-time', data);
+    const response = await apiService.post<BlockedTime>('/blocked-time', data);
+    return response.data;
   },
 
   /**
    * Update blocked time
    */
   async updateBlockedTime(blockId: string, data: Partial<BlockedTimeFormData>): Promise<BlockedTime> {
-    return await apiService.put<BlockedTime>(`/blocked-time/${blockId}`, data);
+    const response = await apiService.put<BlockedTime>(`/blocked-time/${blockId}`, data);
+    return response.data;
   },
 
   /**
@@ -242,14 +254,16 @@ export const calendarApi = {
    * Approve time-off request
    */
   async approveTimeOff(blockId: string): Promise<BlockedTime> {
-    return await apiService.put<BlockedTime>(`/blocked-time/${blockId}/approve`, {});
+    const response = await apiService.put<BlockedTime>(`/blocked-time/${blockId}/approve`, {});
+    return response.data;
   },
 
   /**
    * Reject time-off request
    */
   async rejectTimeOff(blockId: string, reason?: string): Promise<BlockedTime> {
-    return await apiService.put<BlockedTime>(`/blocked-time/${blockId}/reject`, { reason });
+    const response = await apiService.put<BlockedTime>(`/blocked-time/${blockId}/reject`, { reason });
+    return response.data;
   },
 
   /**
@@ -266,7 +280,8 @@ export const calendarApi = {
       limit: (params.limit || 10).toString(),
     });
 
-    return await apiService.get<ClientSearchResult[]>(`/clients/search?${queryParams.toString()}`);
+    const response = await apiService.get<ClientSearchResult[]>(`/clients/search?${queryParams.toString()}`);
+    return response.data;
   },
 
   /**
@@ -288,7 +303,8 @@ export const calendarApi = {
       queryParams.append('staff_id', params.staffId);
     }
 
-    return await apiService.get<ServiceOption[]>(`/services?${queryParams.toString()}`);
+    const response = await apiService.get<ServiceOption[]>(`/services?${queryParams.toString()}`);
+    return response.data;
   },
 
   /**
@@ -318,7 +334,8 @@ export const calendarApi = {
       queryParams.append('start_time', params.startTime);
     }
 
-    return await apiService.get<StaffOption[]>(`/staff?${queryParams.toString()}`);
+    const response = await apiService.get<StaffOption[]>(`/staff?${queryParams.toString()}`);
+    return response.data;
   },
 
   /**
@@ -372,7 +389,8 @@ export const calendarApi = {
       queryParams.append('staff_id', params.staffId);
     }
 
-    return await apiService.get<CalendarMetrics>(`/calendar/metrics?${queryParams.toString()}`);
+    const response = await apiService.get<CalendarMetrics>(`/calendar/metrics?${queryParams.toString()}`);
+    return response.data;
   },
 
   /**
@@ -390,6 +408,7 @@ export const calendarApi = {
     status: string;
     notes?: string;
   }): Promise<{ updated: number }> {
-    return await apiService.post<{ updated: number }>('/appointments/bulk-update-status', params);
+    const response = await apiService.post<{ updated: number }>('/appointments/bulk-update-status', params);
+    return response.data;
   },
 };
