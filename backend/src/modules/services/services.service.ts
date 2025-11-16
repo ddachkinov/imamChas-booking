@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Service, ServiceStatus } from './entities/service.entity';
+import { Service } from './entities/service.entity';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 
@@ -30,10 +30,10 @@ export class ServicesService {
     }
 
     if (!includeInactive) {
-      query.andWhere('service.status = :status', { status: ServiceStatus.ACTIVE });
+      query.andWhere('service.is_active = :isActive', { isActive: true });
     }
 
-    query.orderBy('service.sort_order', 'ASC').addOrderBy('service.name', 'ASC');
+    query.orderBy('service.name', 'ASC');
 
     return query.getMany();
   }

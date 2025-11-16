@@ -23,7 +23,7 @@ import {
   Conflict,
 } from '../types/calendar-responses';
 import { CalendarViewDto, CalendarViewType } from '../dto/calendar-view.dto';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
