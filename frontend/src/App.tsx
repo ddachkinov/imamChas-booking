@@ -14,6 +14,9 @@ const BookingBySlugPage = lazy(() => import('@/pages/booking/BookingBySlugPage')
 // Lazy-loaded auth pages
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage').then(m => ({ default: m.LoginPage })));
 
+// Lazy-loaded landing page
+const LandingPage = lazy(() => import('@/pages/LandingPage').then(m => ({ default: m.LandingPage })));
+
 // Loading fallback component
 const PageLoader = () => (
   <div className="flex items-center justify-center h-screen">
@@ -41,8 +44,15 @@ function App() {
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            {/* Redirect root to admin dashboard */}
-            <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
+            {/* Landing page */}
+            <Route
+              path="/"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <LandingPage />
+                </Suspense>
+              }
+            />
 
             {/* Auth routes */}
             <Route
