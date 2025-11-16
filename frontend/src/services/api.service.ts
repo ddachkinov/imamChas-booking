@@ -33,6 +33,13 @@ class ApiService {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
 
+    // Extract tenant from subdomain (e.g., demo.ic-booking.groundpoint.net -> demo)
+    const hostname = window.location.hostname;
+    const subdomain = hostname.split('.')[0];
+    if (subdomain && subdomain !== 'ic-booking' && subdomain !== 'localhost') {
+      headers['X-Tenant-ID'] = subdomain;
+    }
+
     const response = await fetch(`${this.baseURL}${endpoint}`, {
       ...options,
       headers,
@@ -41,7 +48,16 @@ class ApiService {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'An error occurred');
+      throw { response: { data } };
+    }
+
+    // Wrap the response in ApiResponse format if it's not already wrapped
+    if (!data.hasOwnProperty('success') && !data.hasOwnProperty('data')) {
+      return {
+        success: true,
+        data: data,
+        timestamp: new Date().toISOString()
+      } as ApiResponse<T>;
     }
 
     return data;
