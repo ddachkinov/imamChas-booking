@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   HttpCode,
   HttpStatus,
@@ -61,6 +62,20 @@ export class AuthController {
     const tenantSlug = subdomain === 'api' ? 'demo' : subdomain;
 
     return this.authService.loginBySlug(loginDto, tenantSlug);
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current user information' })
+  @ApiResponse({
+    status: 200,
+    description: 'Current user information',
+    type: Object,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getCurrentUser(@CurrentUser() user: any): Promise<any> {
+    return this.authService.getUserInfo(user.userId);
   }
 
   @Post('refresh')

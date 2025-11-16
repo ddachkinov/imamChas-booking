@@ -167,6 +167,43 @@ export class AuthService {
   }
 
   /**
+   * Get current user information
+   */
+  async getUserInfo(userId: string): Promise<any> {
+    // Find user
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Get user's business_id if they are a staff member
+    const staffMember = await this.staffMemberRepository.findOne({
+      where: { user_id: user.id },
+    });
+    const businessId = staffMember?.business_id || null;
+
+    // Get permissions
+    const permissions = await this.usersService.getUserPermissions(user.id);
+
+    // Return user info (excluding sensitive fields)
+    return {
+      id: user.id,
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      phone: user.phone,
+      avatar_url: user.avatar_url,
+      timezone: user.timezone,
+      locale: user.locale,
+      email_verified: user.email_verified,
+      is_active: user.is_active,
+      tenant_id: user.tenant_id,
+      business_id: businessId,
+      permissions,
+    };
+  }
+
+  /**
    * Refresh access token
    */
   async refreshToken(refreshToken: string): Promise<AuthResponse> {
