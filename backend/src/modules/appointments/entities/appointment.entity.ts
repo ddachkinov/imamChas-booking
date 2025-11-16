@@ -97,15 +97,6 @@ export class Appointment {
   cancelled_by: string;
 
   @Column({ default: false })
-  is_recurring: boolean;
-
-  @Column('uuid', { nullable: true })
-  recurring_group_id: string;
-
-  @Column({ nullable: true })
-  recurrence_rule: string;
-
-  @Column({ default: false })
   is_group_booking: boolean;
 
   @Column({ type: 'int', default: 1 })
