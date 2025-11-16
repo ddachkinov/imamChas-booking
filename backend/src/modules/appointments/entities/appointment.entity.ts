@@ -35,7 +35,6 @@ export enum AppointmentStatus {
 @Index(['location_id', 'start_time', 'end_time'])
 @Index(['staff_member_id', 'start_time', 'end_time'])
 @Index(['client_id', 'status'])
-@Index(['recurring_group_id'])
 @Index(['start_time'])
 export class Appointment {
   @PrimaryGeneratedColumn('uuid')
