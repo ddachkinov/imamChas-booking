@@ -46,11 +46,9 @@ export enum NotificationType {
 }
 
 @Entity('notifications')
-@Index(['tenant_id', 'status'])
-@Index(['recipient_user_id'])
-@Index(['appointment_id'])
-@Index(['scheduled_for', 'status'])
-@Index(['gateway_message_id'])
+@Index(['tenant_id'])
+@Index(['user_id'])
+@Index(['read'])
 export class Notification {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -59,85 +57,37 @@ export class Notification {
   tenant_id: string;
 
   @Column('uuid')
-  recipient_user_id: string;
-
-  @Column('uuid', { nullable: true })
-  appointment_id: string;
-
-  @Column({
-    type: 'enum',
-    enum: NotificationType,
-  })
-  notification_type: NotificationType;
-
-  @Column({
-    type: 'enum',
-    enum: NotificationChannel,
-  })
-  channel: NotificationChannel;
+  user_id: string;
 
   @Column()
-  recipient_address: string; // Email, phone, or device token
+  type: string;
 
-  @Column({ nullable: true })
-  subject: string; // For email
+  @Column()
+  title: string;
 
   @Column('text')
-  body: string;
-
-  @Column('uuid', { nullable: true })
-  template_id: string;
-
-  @Column({
-    type: 'enum',
-    enum: NotificationStatus,
-    default: NotificationStatus.PENDING,
-  })
-  status: NotificationStatus;
-
-  @Column({ type: 'timestamp with time zone', nullable: true })
-  scheduled_for: Date;
-
-  @Column({ type: 'timestamp with time zone', nullable: true })
-  sent_at: Date;
-
-  @Column({ type: 'timestamp with time zone', nullable: true })
-  delivered_at: Date;
-
-  @Column({ type: 'timestamp with time zone', nullable: true })
-  opened_at: Date;
-
-  @Column({ type: 'timestamp with time zone', nullable: true })
-  clicked_at: Date;
-
-  @Column({ nullable: true })
-  failed_reason: string;
-
-  @Column({ nullable: true })
-  gateway_message_id: string; // External provider ID (SendGrid, Twilio, FCM)
-
-  @Column({ type: 'int', default: 0 })
-  retry_count: number;
+  message: string;
 
   @Column({ type: 'jsonb', nullable: true })
-  metadata: Record<string, any>;
+  data: Record<string, any>;
+
+  @Column({ default: false })
+  read: boolean;
+
+  @Column({ type: 'timestamp without time zone', nullable: true })
+  read_at: Date;
+
+  @Column({ default: false })
+  sent_via_email: boolean;
+
+  @Column({ default: false })
+  sent_via_sms: boolean;
 
   @CreateDateColumn()
   created_at: Date;
 
-  @UpdateDateColumn()
-  updated_at: Date;
-
   // Relations
-  @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'recipient_user_id' })
-  recipient: User;
-
-  @ManyToOne(() => Appointment, { nullable: true })
-  @JoinColumn({ name: 'appointment_id' })
-  appointment: Appointment;
-
-  @ManyToOne(() => NotificationTemplate, { nullable: true })
-  @JoinColumn({ name: 'template_id' })
-  template: NotificationTemplate;
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 }
