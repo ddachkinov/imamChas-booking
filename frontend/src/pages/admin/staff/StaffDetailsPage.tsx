@@ -62,6 +62,7 @@ export const StaffDetailsPage = () => {
   };
 
   const formatRoleName = (role: string) => {
+    if (!role) return 'Staff';
     return role.charAt(0).toUpperCase() + role.slice(1);
   };
 

@@ -106,7 +106,7 @@ export const StaffListPage = () => {
       label: 'Role',
       render: (staffMember: StaffMember) => (
         <Badge variant={getRoleBadgeVariant(staffMember.role)}>
-          {staffMember.role.charAt(0).toUpperCase() + staffMember.role.slice(1)}
+          {staffMember.role ? (staffMember.role.charAt(0).toUpperCase() + staffMember.role.slice(1)) : 'Staff'}
         </Badge>
       ),
     },
