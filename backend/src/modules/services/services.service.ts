@@ -21,8 +21,6 @@ export class ServicesService {
   }
 
   async findAll(tenantId: string, businessId?: string, includeInactive: boolean = false): Promise<Service[]> {
-    console.log('[ServicesService.findAll] Called with:', { tenantId, businessId, includeInactive });
-
     const query = this.serviceRepository
       .createQueryBuilder('service')
       .where('service.tenant_id = :tenantId', { tenantId });
@@ -37,14 +35,7 @@ export class ServicesService {
 
     query.orderBy('service.name', 'ASC');
 
-    const sql = query.getQuery();
-    const params = query.getParameters();
-    console.log('[ServicesService.findAll] SQL:', sql);
-    console.log('[ServicesService.findAll] Params:', params);
-
-    const results = await query.getMany();
-    console.log('[ServicesService.findAll] Results count:', results.length);
-    return results;
+    return query.getMany();
   }
 
   async findOne(tenantId: string, id: string): Promise<Service> {
