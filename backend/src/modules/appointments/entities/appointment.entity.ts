@@ -6,10 +6,8 @@ import {
   OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
-  DeleteDateColumn,
   Index,
   JoinColumn,
-  VersionColumn,
 } from 'typeorm';
 import { Tenant } from '../../tenants/entities/tenant.entity';
 import { Business } from '../../businesses/entities/business.entity';
@@ -35,7 +33,6 @@ export enum AppointmentStatus {
 @Index(['location_id', 'start_time', 'end_time'])
 @Index(['staff_member_id', 'start_time', 'end_time'])
 @Index(['client_id', 'status'])
-@Index(['recurring_group_id'])
 @Index(['start_time'])
 export class Appointment {
   @PrimaryGeneratedColumn('uuid')
@@ -97,15 +94,6 @@ export class Appointment {
   cancelled_by: string;
 
   @Column({ default: false })
-  is_recurring: boolean;
-
-  @Column('uuid', { nullable: true })
-  recurring_group_id: string;
-
-  @Column({ nullable: true })
-  recurrence_rule: string;
-
-  @Column({ default: false })
   is_group_booking: boolean;
 
   @Column({ type: 'int', default: 1 })
@@ -123,26 +111,11 @@ export class Appointment {
   @Column({ type: 'timestamp with time zone', nullable: true })
   completion_time: Date;
 
-  @Column({ default: false })
-  no_show_notified: boolean;
-
-  @Column({ type: 'timestamp with time zone', nullable: true })
-  reminder_sent_at: Date;
-
-  @Column({ type: 'jsonb', nullable: true })
-  metadata: Record<string, any>;
-
   @CreateDateColumn()
   created_at: Date;
 
   @UpdateDateColumn()
   updated_at: Date;
-
-  @DeleteDateColumn()
-  deleted_at: Date;
-
-  @VersionColumn()
-  version: number;
 
   // Relationships
   @ManyToOne(() => Tenant)

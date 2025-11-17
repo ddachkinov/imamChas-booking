@@ -1,0 +1,32 @@
+{
+    email {$ACME_EMAIL}
+}
+
+# Main domain - Marketing Landing Page
+{$MAIN_DOMAIN} {
+    root * /var/www/landing
+    encode gzip
+    file_server
+
+    # Handle 404s by serving index.html
+    try_files {path} /index.html
+}
+
+# API subdomain - Backend
+api.{$MAIN_DOMAIN} {
+    reverse_proxy backend:3000
+}
+
+# Demo tenant subdomain - Frontend
+demo.{$MAIN_DOMAIN} {
+    # For API calls from tenant subdomains
+    @api path /api/*
+    handle @api {
+        reverse_proxy backend:3000
+    }
+
+    # All other requests go to frontend
+    handle {
+        reverse_proxy frontend:80
+    }
+}

@@ -84,21 +84,21 @@ export const locationApi = {
 export const serviceApi = {
   getServices: (businessId: string, filters?: ServiceFilters) => {
     const params = new URLSearchParams();
+    params.append('businessId', businessId);
     if (filters?.search) params.append('search', filters.search);
     if (filters?.category) params.append('category', filters.category);
     if (filters?.is_active !== undefined) params.append('is_active', String(filters.is_active));
     if (filters?.min_price) params.append('min_price', String(filters.min_price));
     if (filters?.max_price) params.append('max_price', String(filters.max_price));
 
-    const query = params.toString();
-    return apiService.get<Service[]>(`/businesses/${businessId}/services${query ? `?${query}` : ''}`);
+    return apiService.get<Service[]>(`/services?${params.toString()}`);
   },
 
   getService: (serviceId: string) =>
     apiService.get<Service>(`/services/${serviceId}`),
 
   createService: (businessId: string, data: CreateServiceDto) =>
-    apiService.post<Service>(`/businesses/${businessId}/services`, data),
+    apiService.post<Service>(`/services`, { ...data, business_id: businessId }),
 
   updateService: (serviceId: string, data: Partial<CreateServiceDto>) =>
     apiService.put<Service>(`/services/${serviceId}`, data),

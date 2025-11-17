@@ -11,14 +11,14 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
       type: 'postgres',
       host: this.configService.get<string>('DB_HOST', 'localhost'),
       port: this.configService.get<number>('DB_PORT', 5432),
-      username: this.configService.get<string>('DB_USERNAME', 'postgres'),
+      username: this.configService.get<string>('DB_USER') || this.configService.get<string>('DB_USERNAME', 'postgres'),
       password: this.configService.get<string>('DB_PASSWORD', 'postgres'),
-      database: this.configService.get<string>('DB_DATABASE', 'booking_dev'),
+      database: this.configService.get<string>('DB_NAME') || this.configService.get<string>('DB_DATABASE', 'booking_platform'),
       entities: [__dirname + '/../**/*.entity{.ts,.js}'],
       migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
       synchronize: this.configService.get<string>('NODE_ENV') === 'development',
       logging: this.configService.get<string>('NODE_ENV') === 'development',
-      ssl: this.configService.get<string>('NODE_ENV') === 'production' ? {
+      ssl: this.configService.get<string>('DB_SSL') === 'true' ? {
         rejectUnauthorized: false,
       } : false,
     };

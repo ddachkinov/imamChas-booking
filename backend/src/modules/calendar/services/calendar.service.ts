@@ -23,11 +23,11 @@ import {
   Conflict,
 } from '../types/calendar-responses';
 import { CalendarViewDto, CalendarViewType } from '../dto/calendar-view.dto';
-import * as dayjs from 'dayjs';
-import * as utc from 'dayjs/plugin/utc';
-import * as timezone from 'dayjs/plugin/timezone';
-import * as isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import * as isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -58,7 +58,7 @@ export class CalendarService {
     tenantId: string,
     dto: CalendarViewDto,
   ): Promise<DayViewResponse | WeekViewResponse | MonthViewResponse | ResourceViewResponse> {
-    switch (dto.view_type) {
+    switch (dto.view) {
       case CalendarViewType.DAY:
         return this.getDayView(tenantId, dto);
       case CalendarViewType.WEEK:
@@ -68,7 +68,7 @@ export class CalendarService {
       case CalendarViewType.RESOURCE:
         return this.getResourceView(tenantId, dto);
       default:
-        throw new Error(`Unsupported view type: ${dto.view_type}`);
+        throw new Error(`Unsupported view type: ${dto.view}`);
     }
   }
 
@@ -77,7 +77,7 @@ export class CalendarService {
    */
   async getDayView(tenantId: string, dto: CalendarViewDto): Promise<DayViewResponse> {
     const tz = dto.timezone || 'UTC';
-    const date = dayjs(dto.date).tz(tz);
+    const date = dayjs(dto.start_date).tz(tz);
 
     // Get staff member (use first from filter or find default)
     let staffId = dto.staff_member_ids?.[0];
@@ -189,7 +189,7 @@ export class CalendarService {
    */
   async getWeekView(tenantId: string, dto: CalendarViewDto): Promise<WeekViewResponse> {
     const tz = dto.timezone || 'UTC';
-    const startDate = dayjs(dto.date).tz(tz).startOf('week').add(1, 'day'); // Monday
+    const startDate = dayjs(dto.start_date).tz(tz).startOf('week').add(1, 'day'); // Monday
     const endDate = startDate.add(6, 'day'); // Sunday
 
     const days: DayColumn[] = [];
@@ -247,12 +247,32 @@ export class CalendarService {
       }));
     }
 
+    // Flatten appointments for frontend compatibility
+    const flatAppointments = days.flatMap((day) => day.appointments);
+
+    // Get blocked times for the week
+    const blockedTimes = dto.include_blocked_time
+      ? await this.blockedTimeRepository.find({
+          where: {
+            tenant_id: tenantId,
+            start_time: Between(startDate.toDate(), endDate.toDate()),
+            ...(dto.staff_member_ids?.length && {
+              staff_member_id: In(dto.staff_member_ids),
+            }),
+          },
+          order: { start_time: 'ASC' },
+        })
+      : [];
+
     return {
       start_date: startDate.format('YYYY-MM-DD'),
       end_date: endDate.format('YYYY-MM-DD'),
       timezone: tz,
       days,
+      appointments: flatAppointments,
+      blocked_times: blockedTimes,
       staff_members: staffMembers,
+      business_hours: [],
     };
   }
 
@@ -261,7 +281,7 @@ export class CalendarService {
    */
   async getMonthView(tenantId: string, dto: CalendarViewDto): Promise<MonthViewResponse> {
     const tz = dto.timezone || 'UTC';
-    const date = dayjs(dto.date).tz(tz);
+    const date = dayjs(dto.start_date).tz(tz);
     const year = date.year();
     const month = date.month() + 1; // 1-12
 
@@ -338,7 +358,7 @@ export class CalendarService {
    */
   async getResourceView(tenantId: string, dto: CalendarViewDto): Promise<ResourceViewResponse> {
     const tz = dto.timezone || 'UTC';
-    const startTime = dayjs(dto.date).tz(tz);
+    const startTime = dayjs(dto.start_date).tz(tz);
     const endTime = dto.end_date ? dayjs(dto.end_date).tz(tz) : startTime.endOf('day');
 
     if (!dto.staff_member_ids?.length) {

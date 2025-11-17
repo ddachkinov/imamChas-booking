@@ -43,14 +43,26 @@ ssh root@YOUR_SERVER_IP
 ### Run the Setup Script
 
 ```bash
-# Download and run server setup
-curl -fsSL https://raw.githubusercontent.com/yourusername/booking-platform/main/scripts/server-setup.sh | bash
+# Install git
+apt update && apt install -y git
+
+# Clone repository
+cd /tmp
+git clone https://github.com/ddachkinov/imamChas-booking.git
+cd imamChas-booking
+
+# For PRIVATE repositories:
+# Get token from: https://github.com/settings/tokens
+# git clone https://YOUR_TOKEN@github.com/ddachkinov/imamChas-booking.git
+
+# Run server setup
+bash scripts/server-setup.sh
 
 # This will:
 # - Install Docker & Docker Compose
 # - Configure firewall
 # - Setup automatic security updates
-# - Create application directory
+# - Create application directory at /opt/booking-platform
 # - Optimize system for Docker
 ```
 

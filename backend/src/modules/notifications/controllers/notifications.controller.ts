@@ -8,7 +8,7 @@ import {
   Request,
   UseGuards,
   Patch,
-} from '@nestjs/swagger';
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,

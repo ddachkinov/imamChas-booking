@@ -3,31 +3,17 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
-  DeleteDateColumn,
   Index,
   JoinColumn,
 } from 'typeorm';
 import { Tenant } from '../../tenants/entities/tenant.entity';
 import { Business } from '../../businesses/entities/business.entity';
 
-export enum ServiceStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  ARCHIVED = 'archived',
-}
-
-export enum DepositType {
-  FIXED = 'fixed',
-  PERCENTAGE = 'percentage',
-}
-
 @Entity('services')
 @Index(['tenant_id'])
-@Index(['business_id', 'status'])
-@Index(['business_id', 'category'])
+@Index(['business_id'])
 export class Service {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -56,66 +42,52 @@ export class Service {
   @Column({ type: 'int', default: 0 })
   buffer_after_minutes: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => parseFloat(value),
+    },
+  })
   price: number;
 
-  @Column({ default: 'USD' })
-  price_currency: string;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    nullable: true,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => (value ? parseFloat(value) : null),
+    },
+  })
   deposit_amount: number;
 
-  @Column({ type: 'enum', enum: DepositType, nullable: true })
-  deposit_type: DepositType;
-
-  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
-  tax_rate: number;
-
-  @Column({ nullable: true })
-  image_url: string;
-
-  @Column({ nullable: true })
-  color: string;
+  @Column({ type: 'int', default: 1 })
+  max_capacity: number;
 
   @Column({ default: false })
-  is_group_booking_allowed: boolean;
-
-  @Column({ type: 'int', nullable: true })
-  max_group_size: number;
+  is_group_service: boolean;
 
   @Column({ default: false })
   requires_approval: boolean;
 
-  @Column({ type: 'int', default: 0 })
-  booking_advance_min_hours: number;
+  @Column({ default: true })
+  accepts_online_bookings: boolean;
 
-  @Column({ type: 'int', nullable: true })
-  booking_advance_max_days: number;
+  @Column({ default: true })
+  is_active: boolean;
 
-  @Column({ type: 'int', nullable: true })
-  cancellation_allowed_hours: number;
-
-  @Column({
-    type: 'enum',
-    enum: ServiceStatus,
-    default: ServiceStatus.ACTIVE,
-  })
-  status: ServiceStatus;
-
-  @Column({ type: 'int', default: 0 })
-  sort_order: number;
-
-  @Column({ type: 'jsonb', nullable: true })
-  metadata: Record<string, any>;
+  @Column({ nullable: true })
+  image_url: string;
 
   @CreateDateColumn()
   created_at: Date;
 
   @UpdateDateColumn()
   updated_at: Date;
-
-  @DeleteDateColumn()
-  deleted_at: Date;
 
   @ManyToOne(() => Tenant)
   @JoinColumn({ name: 'tenant_id' })

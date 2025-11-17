@@ -15,8 +15,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: configService.get<string>('JWT_PUBLIC_KEY'),
-      algorithms: ['RS256'],
+      secretOrKey: configService.get<string>('JWT_SECRET'),
+      algorithms: ['HS256'],
       issuer: configService.get<string>('JWT_ISSUER', 'booking-platform'),
       audience: configService.get<string>('JWT_AUDIENCE', 'booking-platform-api'),
       passReqToCallback: false,
@@ -37,14 +37,14 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     }
 
     // Check if user is active
-    if (user.status !== 'active' && user.status !== 'pending_verification') {
+    if (!user.is_active) {
       throw new UnauthorizedException('User account is not active');
     }
 
     // Return user object for request.user
     return {
-      userId: payload.user_id,
-      tenantId: payload.tenant_id,
+      user_id: payload.user_id,
+      tenant_id: payload.tenant_id,
       email: payload.email,
       roles: payload.roles,
       permissions: payload.permissions,

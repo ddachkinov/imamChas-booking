@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { StaffRole } from '@/types/admin.types';
 
@@ -11,9 +11,10 @@ interface ProtectedRouteProps {
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requiredRoles,
   requiredPermissions,
-  redirectTo = '/login',
+  redirectTo = '/admin/login',
 }) => {
   const { isAuthenticated, isLoading, hasRole, hasPermission } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -24,7 +25,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (!isAuthenticated) {
-    return <Navigate to={redirectTo} replace />;
+    // Preserve the intended destination so user can be redirected after login
+    return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
   // Check role requirements

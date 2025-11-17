@@ -1,0 +1,157 @@
+{
+  "testDate": "2025-11-17T11:41:31.291Z",
+  "environment": "https://demo.ic-booking.groundpoint.net",
+  "bugs": [
+    {
+      "severity": "high",
+      "type": "API Error",
+      "description": "HTTP 401 on POST https://api.ic-booking.groundpoint.net/api/auth/login",
+      "endpoint": "https://api.ic-booking.groundpoint.net/api/auth/login",
+      "status": 401,
+      "method": "POST"
+    },
+    {
+      "severity": "critical",
+      "type": "Authentication",
+      "description": "Login does not redirect after submission",
+      "stepsToReproduce": [
+        "Navigate to admin login",
+        "Fill email: admin@example.com",
+        "Fill password",
+        "Click submit"
+      ],
+      "expectedBehavior": "Should redirect to dashboard after successful login",
+      "actualBehavior": "Remains on login page, no redirect occurs",
+      "errorMessages": [],
+      "screenshot": "04-after-login.png"
+    },
+    {
+      "severity": "medium",
+      "type": "UI Component Missing",
+      "description": "Calendar component not found: New Appointment",
+      "stepsToReproduce": [
+        "Navigate to https://demo.ic-booking.groundpoint.net/calendar"
+      ],
+      "expectedBehavior": "New Appointment should be visible on calendar page",
+      "actualBehavior": "New Appointment not found in DOM"
+    },
+    {
+      "severity": "medium",
+      "type": "UI Component Missing",
+      "description": "Calendar component not found: Previous Button",
+      "stepsToReproduce": [
+        "Navigate to https://demo.ic-booking.groundpoint.net/calendar"
+      ],
+      "expectedBehavior": "Previous Button should be visible on calendar page",
+      "actualBehavior": "Previous Button not found in DOM"
+    },
+    {
+      "severity": "medium",
+      "type": "UI Component Missing",
+      "description": "Calendar component not found: Next Button",
+      "stepsToReproduce": [
+        "Navigate to https://demo.ic-booking.groundpoint.net/calendar"
+      ],
+      "expectedBehavior": "Next Button should be visible on calendar page",
+      "actualBehavior": "Next Button not found in DOM"
+    },
+    {
+      "severity": "medium",
+      "type": "UI Component Missing",
+      "description": "Calendar component not found: Today Button",
+      "stepsToReproduce": [
+        "Navigate to https://demo.ic-booking.groundpoint.net/calendar"
+      ],
+      "expectedBehavior": "Today Button should be visible on calendar page",
+      "actualBehavior": "Today Button not found in DOM"
+    },
+    {
+      "severity": "medium",
+      "type": "UI Component Missing",
+      "description": "Calendar component not found: Week View",
+      "stepsToReproduce": [
+        "Navigate to https://demo.ic-booking.groundpoint.net/calendar"
+      ],
+      "expectedBehavior": "Week View should be visible on calendar page",
+      "actualBehavior": "Week View not found in DOM"
+    },
+    {
+      "severity": "medium",
+      "type": "UI Component Missing",
+      "description": "Calendar component not found: Day View",
+      "stepsToReproduce": [
+        "Navigate to https://demo.ic-booking.groundpoint.net/calendar"
+      ],
+      "expectedBehavior": "Day View should be visible on calendar page",
+      "actualBehavior": "Day View not found in DOM"
+    },
+    {
+      "severity": "medium",
+      "type": "UI Component Missing",
+      "description": "Calendar component not found: Month View",
+      "stepsToReproduce": [
+        "Navigate to https://demo.ic-booking.groundpoint.net/calendar"
+      ],
+      "expectedBehavior": "Month View should be visible on calendar page",
+      "actualBehavior": "Month View not found in DOM"
+    }
+  ],
+  "consoleErrors": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 ()",
+      "location": {
+        "url": "https://api.ic-booking.groundpoint.net/api/auth/login",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "error",
+      "text": "Login error: {response: Object}",
+      "location": {
+        "url": "https://demo.ic-booking.groundpoint.net/assets/LoginPage-q_UKl6_M.js",
+        "lineNumber": 0,
+        "columnNumber": 1211
+      }
+    }
+  ],
+  "networkErrors": [],
+  "testResults": [
+    {
+      "test": "Landing Page",
+      "status": "completed",
+      "url": "https://demo.ic-booking.groundpoint.net/",
+      "screenshot": "01-landing-page.png"
+    },
+    {
+      "test": "Admin Login Page",
+      "status": "success",
+      "url": "https://demo.ic-booking.groundpoint.net/admin/login",
+      "screenshot": "02-login-form.png"
+    },
+    {
+      "test": "Calendar Page Access",
+      "status": "success",
+      "url": "https://demo.ic-booking.groundpoint.net/calendar",
+      "components": {
+        "New Appointment": 0,
+        "Previous Button": 0,
+        "Next Button": 0,
+        "Today Button": 0,
+        "Week View": 0,
+        "Day View": 0,
+        "Month View": 0
+      }
+    }
+  ],
+  "summary": {
+    "totalBugs": 9,
+    "critical": 1,
+    "high": 1,
+    "medium": 7,
+    "low": 0,
+    "consoleErrors": 2,
+    "networkErrors": 0
+  }
+}

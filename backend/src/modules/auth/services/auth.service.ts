@@ -18,6 +18,7 @@ import { TenantsService } from '../../tenants/tenants.service';
 import { User, UserStatus } from '../../users/entities/user.entity';
 import { PasswordResetToken } from '../entities/password-reset-token.entity';
 import { EmailVerificationToken } from '../entities/email-verification-token.entity';
+import { StaffMember } from '../../staff/entities/staff-member.entity';
 
 @Injectable()
 export class AuthService {
@@ -33,6 +34,8 @@ export class AuthService {
     private readonly passwordResetTokenRepository: Repository<PasswordResetToken>,
     @InjectRepository(EmailVerificationToken)
     private readonly emailVerificationTokenRepository: Repository<EmailVerificationToken>,
+    @InjectRepository(StaffMember)
+    private readonly staffMemberRepository: Repository<StaffMember>,
     @Inject('REDIS_CLIENT') private readonly redisClient: Redis,
   ) {}
 
@@ -80,6 +83,19 @@ export class AuthService {
     // Generate JWT tokens
     const permissions = await this.usersService.getUserPermissions(user.id);
     return this.jwtService.generateTokenPair(user, tenant, [], permissions);
+  }
+
+  /**
+   * Login user by tenant slug
+   */
+  async loginBySlug(loginDto: LoginDto, tenantSlug: string): Promise<AuthResponse> {
+    // Get tenant by slug
+    const tenant = await this.tenantsService.findBySlug(tenantSlug);
+    if (!tenant) {
+      throw new UnauthorizedException('Tenant not found');
+    }
+
+    return this.login(loginDto, tenant.id);
   }
 
   /**
@@ -139,6 +155,12 @@ export class AuthService {
     // Update last login
     await this.usersService.updateLastLogin(user.id);
 
+    // Get user's business_id if they are a staff member
+    const staffMember = await this.staffMemberRepository.findOne({
+      where: { user_id: user.id },
+    });
+    const businessId = staffMember?.business_id || null;
+
     // Generate JWT tokens with extended expiry if remember_me is enabled
     const permissions = await this.usersService.getUserPermissions(user.id);
     return this.jwtService.generateTokenPair(
@@ -147,7 +169,45 @@ export class AuthService {
       user.userRoles || [],
       permissions,
       loginDto.remember_me || false,
+      businessId,
     );
+  }
+
+  /**
+   * Get current user information
+   */
+  async getUserInfo(userId: string): Promise<any> {
+    // Find user
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Get user's business_id if they are a staff member
+    const staffMember = await this.staffMemberRepository.findOne({
+      where: { user_id: user.id },
+    });
+    const businessId = staffMember?.business_id || null;
+
+    // Get permissions
+    const permissions = await this.usersService.getUserPermissions(user.id);
+
+    // Return user info (excluding sensitive fields)
+    return {
+      id: user.id,
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      phone: user.phone,
+      avatar_url: user.avatar_url,
+      timezone: user.timezone,
+      locale: user.locale,
+      email_verified: user.email_verified,
+      is_active: user.is_active,
+      tenant_id: user.tenant_id,
+      business_id: businessId,
+      permissions,
+    };
   }
 
   /**
@@ -181,9 +241,15 @@ export class AuthService {
     // Delete old refresh token (token rotation)
     await this.jwtService.deleteRefreshToken(payload.user_id, payload.jti);
 
+    // Get user's business_id if they are a staff member
+    const staffMember = await this.staffMemberRepository.findOne({
+      where: { user_id: user.id },
+    });
+    const businessId = staffMember?.business_id || null;
+
     // Generate new token pair
     const permissions = await this.usersService.getUserPermissions(user.id);
-    return this.jwtService.generateTokenPair(user, tenant, user.userRoles || [], permissions);
+    return this.jwtService.generateTokenPair(user, tenant, user.userRoles || [], permissions, businessId);
   }
 
   /**

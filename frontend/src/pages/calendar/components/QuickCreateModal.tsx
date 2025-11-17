@@ -64,14 +64,14 @@ export const QuickCreateModal: React.FC<QuickCreateModalProps> = ({
   });
 
   // Fetch services
-  const { data: services } = useQuery({
+  const { data: services, isLoading: servicesLoading, error: servicesError } = useQuery({
     queryKey: ['services', businessId],
     queryFn: () => calendarApi.getServices({ businessId }),
     enabled: !!businessId,
   });
 
   // Fetch staff (filtered by selected service)
-  const { data: staff } = useQuery({
+  const { data: staff, isLoading: staffLoading, error: staffError } = useQuery({
     queryKey: ['staff', businessId, serviceId],
     queryFn: () => calendarApi.getStaff({ businessId, serviceId }),
     enabled: !!businessId,
@@ -94,6 +94,47 @@ export const QuickCreateModal: React.FC<QuickCreateModalProps> = ({
   const onSubmit = (data: QuickCreateFormData) => {
     createMutation.mutate(data);
   };
+
+  // Show loading or error states
+  if (servicesLoading || staffLoading) {
+    return (
+      <Modal isOpen={isOpen} onClose={onClose} title="Quick Create Appointment">
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <span className="ml-3 text-gray-600">Loading...</span>
+        </div>
+      </Modal>
+    );
+  }
+
+  if (servicesError || staffError) {
+    return (
+      <Modal isOpen={isOpen} onClose={onClose} title="Quick Create Appointment">
+        <div className="text-center py-8">
+          <p className="text-red-600 mb-4">Failed to load required data</p>
+          <Button onClick={onClose} variant="secondary">Close</Button>
+        </div>
+      </Modal>
+    );
+  }
+
+  // Check if we have required data
+  const hasServices = services && Array.isArray(services) && services.length > 0;
+  const hasStaff = staff && Array.isArray(staff) && staff.length > 0;
+
+  if (!hasServices || !hasStaff) {
+    return (
+      <Modal isOpen={isOpen} onClose={onClose} title="Quick Create Appointment">
+        <div className="text-center py-8">
+          <p className="text-amber-600 mb-4">
+            {!hasServices && 'No services available. Please create a service first.'}
+            {hasServices && !hasStaff && 'No staff members available. Please add staff members first.'}
+          </p>
+          <Button onClick={onClose} variant="secondary">Close</Button>
+        </div>
+      </Modal>
+    );
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Quick Create Appointment">

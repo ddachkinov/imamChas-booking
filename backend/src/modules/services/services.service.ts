@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Service, ServiceStatus } from './entities/service.entity';
+import { Service } from './entities/service.entity';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { BusinessesService } from '../businesses/businesses.service';
@@ -124,10 +124,9 @@ export class ServicesService {
     }
 
     if (isActive !== undefined) {
-      const status = isActive ? ServiceStatus.ACTIVE : ServiceStatus.INACTIVE;
-      query.andWhere('service.status = :status', { status });
+      query.andWhere('service.is_active = :isActive', { isActive });
     } else if (!includeInactive) {
-      query.andWhere('service.status = :status', { status: ServiceStatus.ACTIVE });
+      query.andWhere('service.is_active = :isActive', { isActive: true });
     }
 
     if (minPrice !== undefined) {
@@ -196,7 +195,7 @@ export class ServicesService {
     await this.serviceRepository
       .createQueryBuilder()
       .update(Service)
-      .set({ status: ServiceStatus.INACTIVE })
+      .set({ is_active: false })
       .where('id IN (:...serviceIds)', { serviceIds })
       .andWhere('tenant_id = :tenantId', { tenantId })
       .execute();

@@ -29,12 +29,14 @@ export class NotificationTemplate {
   @Column({
     type: 'enum',
     enum: NotificationType,
+    enumName: 'notification_type_enum',
   })
   notification_type: NotificationType;
 
   @Column({
     type: 'enum',
     enum: NotificationChannel,
+    enumName: 'notification_channel_enum',
   })
   channel: NotificationChannel;
 

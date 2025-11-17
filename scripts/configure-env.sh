@@ -141,14 +141,6 @@ print_info "Press Enter to skip if you don't need error tracking"
 prompt SENTRY_DSN "Sentry DSN (or press Enter to skip):" ""
 VITE_SENTRY_DSN="$SENTRY_DSN"
 
-# Traefik Dashboard
-print_header "Traefik Dashboard Authentication"
-print_info "Installing apache2-utils for password generation..."
-apt-get update -qq && apt-get install -y -qq apache2-utils > /dev/null 2>&1 || true
-
-prompt TRAEFIK_PASSWORD "Set Traefik dashboard password:" "" true
-TRAEFIK_DASHBOARD_AUTH=$(htpasswd -nb admin "$TRAEFIK_PASSWORD" | sed 's/\$/\$\$/g')
-
 # Generate .env.production
 print_header "Generating Configuration File"
 
@@ -230,11 +222,6 @@ LOG_LEVEL=info
 # =============================================================================
 VITE_ENABLE_ANALYTICS=true
 VITE_ENABLE_ERROR_TRACKING=true
-
-# =============================================================================
-# TRAEFIK DASHBOARD
-# =============================================================================
-TRAEFIK_DASHBOARD_AUTH=$TRAEFIK_DASHBOARD_AUTH
 
 # =============================================================================
 # RATE LIMITING

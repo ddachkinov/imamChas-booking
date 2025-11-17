@@ -22,7 +22,6 @@ export enum RoleScope {
 
 @Entity('roles')
 @Index(['tenant_id', 'name'], { unique: true })
-@Index(['tenant_id', 'scope'])
 export class Role {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -40,21 +39,11 @@ export class Role {
   @Column({ default: false })
   is_system_role: boolean;
 
-  @Column({
-    type: 'enum',
-    enum: RoleScope,
-    default: RoleScope.TENANT,
-  })
-  scope: RoleScope;
-
   @CreateDateColumn()
   created_at: Date;
 
   @UpdateDateColumn()
   updated_at: Date;
-
-  @DeleteDateColumn({ nullable: true })
-  deleted_at: Date;
 
   // Relationships
   @ManyToOne(() => Tenant)

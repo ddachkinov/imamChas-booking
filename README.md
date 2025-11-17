@@ -181,12 +181,22 @@ For the fastest deployment with Docker on a single server:
 ```bash
 # 1. Get a server ($12/mo from DigitalOcean, Hetzner, etc.)
 # 2. Configure DNS (point *.yourdomain.com to server)
-# 3. Run setup
-curl -fsSL https://raw.githubusercontent.com/ddachkinov/imamChas-booking/main/scripts/server-setup.sh | bash
 
-# 4. Clone repo and configure
-cd /opt/booking-platform
-git clone <your-repo> .
+# 3. SSH into server and run setup
+ssh root@YOUR_SERVER_IP
+apt update && apt install -y git
+
+# 4. Clone repo
+cd /opt
+git clone https://github.com/ddachkinov/imamChas-booking.git booking-platform
+# For private repos: git clone https://YOUR_TOKEN@github.com/ddachkinov/imamChas-booking.git booking-platform
+
+cd booking-platform
+
+# 5. Run setup script
+bash scripts/server-setup.sh
+
+# 6. Configure and deploy
 ./scripts/configure-env.sh  # Interactive configuration
 ./deploy.sh                 # Deploy everything
 ```

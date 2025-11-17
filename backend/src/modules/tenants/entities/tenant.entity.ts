@@ -34,8 +34,15 @@ export class Tenant {
   @Index()
   slug: string;
 
+  @Column({ unique: true })
+  @Index()
+  subdomain: string;
+
   @Column()
   name: string;
+
+  @Column({ default: 'active' })
+  status: string;
 
   @Column({
     type: 'enum',
@@ -53,31 +60,28 @@ export class Tenant {
   subscription_status: SubscriptionStatus;
 
   @Column({ type: 'timestamp', nullable: true })
-  subscription_started_at: Date;
+  trial_ends_at: Date;
 
   @Column({ type: 'timestamp', nullable: true })
-  subscription_expires_at: Date;
+  subscription_starts_at: Date;
 
-  @Column({ type: 'jsonb', default: {} })
-  feature_flags: Record<string, boolean>;
+  @Column({ type: 'timestamp', nullable: true })
+  subscription_ends_at: Date;
+
+  @Column({ nullable: true })
+  stripe_customer_id: string;
+
+  @Column({ nullable: true })
+  stripe_subscription_id: string;
 
   @Column({ type: 'jsonb', default: {} })
   settings: Record<string, any>;
-
-  @Column({ nullable: true })
-  data_residency_region: string;
-
-  @Column({ default: false })
-  is_self_hosted: boolean;
 
   @CreateDateColumn()
   created_at: Date;
 
   @UpdateDateColumn()
   updated_at: Date;
-
-  @DeleteDateColumn({ nullable: true })
-  deleted_at: Date;
 
   // Relationships
   @OneToMany(() => User, (user) => user.tenant)

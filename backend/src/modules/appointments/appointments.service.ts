@@ -12,8 +12,8 @@ import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { CancelAppointmentDto } from './dto/cancel-appointment.dto';
 import { ConflictResolverService } from './services/conflict-resolver.service';
 import * as dayjs from 'dayjs';
-import * as utc from 'dayjs/plugin/utc';
-import * as timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 import { v4 as uuidv4 } from 'uuid';
 
 dayjs.extend(utc);

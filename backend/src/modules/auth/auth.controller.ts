@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   HttpCode,
   HttpStatus,
@@ -52,10 +53,29 @@ export class AuthController {
     type: Object,
   })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
-  async login(@Body() loginDto: LoginDto): Promise<AuthResponse> {
-    // TODO: Extract tenant ID from request or subdomain
-    const tenantId = '00000000-0000-0000-0000-000000000000';
-    return this.authService.login(loginDto, tenantId);
+  async login(@Body() loginDto: LoginDto, @Req() request: any): Promise<AuthResponse> {
+    // Extract tenant from subdomain (e.g., demo.ic-booking.groundpoint.net -> 'demo')
+    const host = request.headers.host || '';
+    const subdomain = host.split('.')[0];
+
+    // Use subdomain to get tenant, fallback to demo tenant for development
+    const tenantSlug = subdomain === 'api' ? 'demo' : subdomain;
+
+    return this.authService.loginBySlug(loginDto, tenantSlug);
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current user information' })
+  @ApiResponse({
+    status: 200,
+    description: 'Current user information',
+    type: Object,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getCurrentUser(@CurrentUser() user: any): Promise<any> {
+    return this.authService.getUserInfo(user.userId);
   }
 
   @Post('refresh')

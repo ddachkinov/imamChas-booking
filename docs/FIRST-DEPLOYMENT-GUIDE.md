@@ -95,8 +95,20 @@ Type: `yes` and press Enter
 Once connected to your server, run:
 
 ```bash
-# Download and run the setup script
-curl -fsSL https://raw.githubusercontent.com/ddachkinov/imamChas-booking/main/scripts/server-setup.sh | bash
+# Install git first
+apt update && apt install -y git
+
+# Clone repository to access the script
+cd /tmp
+git clone https://github.com/ddachkinov/imamChas-booking.git
+cd imamChas-booking
+
+# For PRIVATE repositories, use a token:
+# Get token from: https://github.com/settings/tokens (select 'repo' scope)
+# git clone https://YOUR_GITHUB_TOKEN@github.com/ddachkinov/imamChas-booking.git
+
+# Run the setup script
+bash scripts/server-setup.sh
 ```
 
 **What this does:**

@@ -52,11 +52,11 @@ export class JwtService {
       jti: tokenId,
     };
 
-    const privateKey = this.configService.get<string>('JWT_PRIVATE_KEY');
+    const secret = this.configService.get<string>('JWT_SECRET');
 
     return this.nestJwtService.sign(payload, {
-      algorithm: 'RS256',
-      privateKey,
+      algorithm: 'HS256',
+      secret,
       issuer: this.issuer,
       audience: this.audience,
     });
@@ -80,11 +80,11 @@ export class JwtService {
       jti: tokenId,
     };
 
-    const privateKey = this.configService.get<string>('JWT_PRIVATE_KEY');
+    const secret = this.configService.get<string>('REFRESH_TOKEN_SECRET');
 
     const refreshToken = this.nestJwtService.sign(payload, {
-      algorithm: 'RS256',
-      privateKey,
+      algorithm: 'HS256',
+      secret,
       issuer: this.issuer,
       audience: this.audience,
     });
@@ -100,11 +100,11 @@ export class JwtService {
    */
   async verifyToken(token: string): Promise<JwtPayload> {
     try {
-      const publicKey = this.configService.get<string>('JWT_PUBLIC_KEY');
+      const secret = this.configService.get<string>('JWT_SECRET');
 
       const payload = this.nestJwtService.verify(token, {
-        algorithms: ['RS256'],
-        publicKey,
+        algorithms: ['HS256'],
+        secret,
         issuer: this.issuer,
         audience: this.audience,
       }) as JwtPayload;
@@ -199,11 +199,15 @@ export class JwtService {
     roles: any[] = [],
     permissions: string[] = [],
     rememberMe: boolean = false,
+    businessId: string | null = null,
   ): Promise<AuthResponse> {
     const [accessToken, refreshToken] = await Promise.all([
       this.generateAccessToken(user, tenant, roles, permissions),
       this.generateRefreshToken(user, tenant, rememberMe),
     ]);
+
+    // Determine primary role from roles array
+    const primaryRole = roles.length > 0 ? roles[0].name : 'User';
 
     return {
       access_token: accessToken,
@@ -216,6 +220,10 @@ export class JwtService {
         first_name: user.first_name,
         last_name: user.last_name,
         email_verified: user.email_verified,
+        tenant_id: tenant.id,
+        business_id: businessId,
+        role: primaryRole,
+        permissions,
       },
     };
   }

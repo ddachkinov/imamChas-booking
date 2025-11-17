@@ -1,0 +1,28 @@
+{
+  "name": "imamchas-booking",
+  "version": "1.0.0",
+  "description": "A comprehensive booking and appointment management platform designed to connect service-based businesses with their clients. Built for appointment-driven businesses including hair salons, barbershops, beauty spas, medical clinics, fitness studios, and similar service providers.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ddachkinov/imamChas-booking.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ddachkinov/imamChas-booking/issues"
+  },
+  "homepage": "https://github.com/ddachkinov/imamChas-booking#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "playwright": "^1.56.1"
+  }
+}

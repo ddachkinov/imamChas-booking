@@ -41,6 +41,9 @@ export class StaffMember {
   @Column('uuid', { nullable: true })
   location_id: string;
 
+  @Column()
+  display_name: string;
+
   @Column({ nullable: true })
   title: string;
 
@@ -48,16 +51,13 @@ export class StaffMember {
   bio: string;
 
   @Column({ nullable: true })
-  photo_url: string;
+  profile_image_url: string;
 
   @Column({ nullable: true })
-  calendar_color: string;
+  phone: string;
 
-  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
-  commission_rate: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  hourly_rate: number;
+  @Column({ nullable: true })
+  email: string;
 
   @Column({
     type: 'enum',
@@ -65,12 +65,6 @@ export class StaffMember {
     default: StaffStatus.ACTIVE,
   })
   status: StaffStatus;
-
-  @Column({ type: 'date', nullable: true })
-  hire_date: Date;
-
-  @Column({ type: 'date', nullable: true })
-  termination_date: Date;
 
   @Column({ default: true })
   accepts_online_bookings: boolean;
@@ -81,17 +75,11 @@ export class StaffMember {
   @Column({ type: 'int', default: 0 })
   default_buffer_after_minutes: number;
 
-  @Column({ type: 'jsonb', nullable: true })
-  metadata: Record<string, any>;
-
   @CreateDateColumn()
   created_at: Date;
 
   @UpdateDateColumn()
   updated_at: Date;
-
-  @DeleteDateColumn()
-  deleted_at: Date;
 
   @ManyToOne(() => Tenant)
   @JoinColumn({ name: 'tenant_id' })

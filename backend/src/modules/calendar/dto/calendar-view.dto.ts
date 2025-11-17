@@ -19,16 +19,15 @@ export enum CalendarViewType {
 export class CalendarViewDto {
   @ApiProperty({ description: 'View type', enum: CalendarViewType })
   @IsEnum(CalendarViewType)
-  view_type: CalendarViewType;
+  view: CalendarViewType;
 
-  @ApiProperty({ description: 'Date for view (ISO 8601 date)' })
+  @ApiProperty({ description: 'Start date for view (ISO 8601 date)' })
   @IsDateString()
-  date: string;
+  start_date: string;
 
-  @ApiPropertyOptional({ description: 'End date for resource view date range' })
-  @IsOptional()
+  @ApiProperty({ description: 'End date for view (ISO 8601 date)' })
   @IsDateString()
-  end_date?: string;
+  end_date: string;
 
   @ApiPropertyOptional({ description: 'Business ID filter' })
   @IsOptional()

@@ -14,6 +14,7 @@ import { PasswordResetToken } from './entities/password-reset-token.entity';
 import { EmailVerificationToken } from './entities/email-verification-token.entity';
 import { UsersModule } from '../users/users.module';
 import { TenantsModule } from '../tenants/tenants.module';
+import { StaffMember } from '../staff/entities/staff-member.entity';
 
 @Module({
   imports: [
@@ -26,13 +27,13 @@ import { TenantsModule } from '../tenants/tenants.module';
         publicKey: configService.get<string>('JWT_PUBLIC_KEY'),
         signOptions: {
           algorithm: 'RS256',
-          expiresIn: configService.get<string>('JWT_ACCESS_TOKEN_EXPIRY', '3600s'),
+          // Note: expiresIn removed from global config as we manually set exp in payload
           issuer: configService.get<string>('JWT_ISSUER', 'booking-platform'),
           audience: configService.get<string>('JWT_AUDIENCE', 'booking-platform-api'),
         },
       }),
     }),
-    TypeOrmModule.forFeature([PasswordResetToken, EmailVerificationToken]),
+    TypeOrmModule.forFeature([PasswordResetToken, EmailVerificationToken, StaffMember]),
     UsersModule,
     TenantsModule,
   ],

@@ -2,7 +2,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
   IsOptional,
-  IsEnum,
   IsNumber,
   IsBoolean,
   IsInt,
@@ -12,13 +11,13 @@ import {
   MaxLength,
   IsUUID,
   IsUrl,
+  IsEnum,
   Matches,
   ValidationArguments,
   ValidatorConstraint,
   ValidatorConstraintInterface,
   Validate,
 } from 'class-validator';
-import { ServiceStatus, DepositType } from '../entities/service.entity';
 
 export enum ServiceCategory {
   HAIRCUT = 'haircut',
@@ -89,74 +88,40 @@ export class CreateServiceDto {
   @Min(0)
   price: number;
 
-  @ApiProperty({ default: 'USD' })
-  @IsString()
-  price_currency: string = 'USD';
-
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
   @Min(0)
   deposit_amount?: number;
 
-  @ApiPropertyOptional({ enum: DepositType })
+  @ApiPropertyOptional({ default: 1 })
   @IsOptional()
-  @IsEnum(DepositType)
-  deposit_type?: DepositType;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  tax_rate?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsUrl()
-  image_url?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  @Matches(/^#[0-9A-Fa-f]{6}$/)
-  color?: string;
+  @IsInt()
+  @IsPositive()
+  max_capacity?: number;
 
   @ApiPropertyOptional({ default: false })
   @IsOptional()
   @IsBoolean()
-  is_group_booking_allowed?: boolean;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsInt()
-  @IsPositive()
-  max_group_size?: number;
+  is_group_service?: boolean;
 
   @ApiPropertyOptional({ default: false })
   @IsOptional()
   @IsBoolean()
   requires_approval?: boolean;
 
-  @ApiPropertyOptional({ default: 0 })
+  @ApiPropertyOptional({ default: true })
   @IsOptional()
-  @IsInt()
-  @Min(0)
-  booking_advance_min_hours?: number;
+  @IsBoolean()
+  accepts_online_bookings?: boolean;
+
+  @ApiPropertyOptional({ default: true })
+  @IsOptional()
+  @IsBoolean()
+  is_active?: boolean;
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsInt()
-  @IsPositive()
-  booking_advance_max_days?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsInt()
-  @IsPositive()
-  cancellation_allowed_hours?: number;
-
-  @ApiPropertyOptional({ enum: ServiceStatus, default: ServiceStatus.ACTIVE })
-  @IsOptional()
-  @IsEnum(ServiceStatus)
-  status?: ServiceStatus;
+  @IsUrl()
+  image_url?: string;
 }

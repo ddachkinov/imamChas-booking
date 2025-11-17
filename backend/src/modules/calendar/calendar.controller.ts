@@ -49,6 +49,24 @@ export class CalendarController {
   ) {}
 
   /**
+   * Get calendar data - root endpoint that routes based on view parameter
+   */
+  @Get()
+  @ApiOperation({ summary: 'Get calendar data' })
+  @ApiResponse({
+    status: 200,
+    description: 'Calendar data retrieved',
+  })
+  async getCalendarData(
+    @Request() req,
+    @Query() query: CalendarViewDto,
+  ): Promise<DayViewResponse | WeekViewResponse | MonthViewResponse | ResourceViewResponse> {
+    const tenantId = req.user.tenantId;
+
+    return this.calendarService.getCalendarView(tenantId, query);
+  }
+
+  /**
    * Get calendar view (day, week, month, or resource)
    */
   @Get('view')
@@ -81,7 +99,7 @@ export class CalendarController {
     @Query() query: CalendarViewDto,
   ): Promise<DayViewResponse> {
     const tenantId = req.user.tenantId;
-    query.view_type = 'day' as any;
+    query.view = 'day' as any;
 
     return this.calendarService.getDayView(tenantId, query);
   }
@@ -101,7 +119,7 @@ export class CalendarController {
     @Query() query: CalendarViewDto,
   ): Promise<WeekViewResponse> {
     const tenantId = req.user.tenantId;
-    query.view_type = 'week' as any;
+    query.view = 'week' as any;
 
     return this.calendarService.getWeekView(tenantId, query);
   }
@@ -121,7 +139,7 @@ export class CalendarController {
     @Query() query: CalendarViewDto,
   ): Promise<MonthViewResponse> {
     const tenantId = req.user.tenantId;
-    query.view_type = 'month' as any;
+    query.view = 'month' as any;
 
     return this.calendarService.getMonthView(tenantId, query);
   }
@@ -141,7 +159,7 @@ export class CalendarController {
     @Query() query: CalendarViewDto,
   ): Promise<ResourceViewResponse> {
     const tenantId = req.user.tenantId;
-    query.view_type = 'resource' as any;
+    query.view = 'resource' as any;
 
     return this.calendarService.getResourceView(tenantId, query);
   }
