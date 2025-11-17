@@ -1,4 +1,4 @@
-import { IsEmail, IsString, IsOptional } from 'class-validator';
+import { IsEmail, IsString, IsOptional, IsBoolean } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class LoginDto {
@@ -23,4 +23,13 @@ export class LoginDto {
   @IsOptional()
   @IsString()
   mfa_code?: string;
+
+  @ApiPropertyOptional({
+    description: 'Remember me - extends refresh token expiration to 30 days',
+    example: true,
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  remember_me?: boolean;
 }

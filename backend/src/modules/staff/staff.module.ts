@@ -5,9 +5,11 @@ import { StaffService } from './staff.service';
 import { StaffMember } from './entities/staff-member.entity';
 import { Availability } from './entities/availability.entity';
 import { StaffSkill } from './entities/staff-skill.entity';
+import { User } from '../users/entities/user.entity';
+import { Appointment } from '../appointments/entities/appointment.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([StaffMember, Availability, StaffSkill])],
+  imports: [TypeOrmModule.forFeature([StaffMember, Availability, StaffSkill, User, Appointment])],
   controllers: [StaffController],
   providers: [StaffService],
   exports: [StaffService, TypeOrmModule],
