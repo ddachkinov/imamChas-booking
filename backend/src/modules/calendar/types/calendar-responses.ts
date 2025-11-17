@@ -61,7 +61,10 @@ export class WeekViewResponse {
   @ApiProperty() end_date: string; // ISO 8601 date (Sunday)
   @ApiProperty() timezone: string;
   @ApiProperty({ type: [DayColumn] }) days: DayColumn[];
+  @ApiProperty({ type: [AppointmentSummary] }) appointments: AppointmentSummary[]; // Flat array for frontend compatibility
+  @ApiProperty({ type: [Object] }) blocked_times: any[]; // Flat array of blocked times
   @ApiProperty({ type: [StaffSummary] }) staff_members?: StaffSummary[];
+  @ApiProperty() business_hours?: any[]; // Business hours array
 }
 
 export class DayCell {

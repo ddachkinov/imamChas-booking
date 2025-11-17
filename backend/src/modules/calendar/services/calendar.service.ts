@@ -235,12 +235,32 @@ export class CalendarService {
       }));
     }
 
+    // Flatten appointments for frontend compatibility
+    const flatAppointments = days.flatMap((day) => day.appointments);
+
+    // Get blocked times for the week
+    const blockedTimes = dto.include_blocked_time
+      ? await this.blockedTimeRepository.find({
+          where: {
+            tenant_id: tenantId,
+            start_time: Between(startDate.toDate(), endDate.toDate()),
+            ...(dto.staff_member_ids?.length && {
+              staff_member_id: In(dto.staff_member_ids),
+            }),
+          },
+          order: { start_time: 'ASC' },
+        })
+      : [];
+
     return {
       start_date: startDate.format('YYYY-MM-DD'),
       end_date: endDate.format('YYYY-MM-DD'),
       timezone: tz,
       days,
+      appointments: flatAppointments,
+      blocked_times: blockedTimes,
       staff_members: staffMembers,
+      business_hours: [],
     };
   }
 
