@@ -45,8 +45,8 @@ export class RegisterDto {
 
   @ApiPropertyOptional({
     description: 'Preferred language (ISO 639-1)',
-    example: 'en',
-    default: 'en',
+    example: 'bg',
+    default: 'bg',
   })
   @IsOptional()
   @IsString()

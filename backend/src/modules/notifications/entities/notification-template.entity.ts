@@ -38,7 +38,7 @@ export class NotificationTemplate {
   })
   channel: NotificationChannel;
 
-  @Column({ default: 'en' })
+  @Column({ default: 'bg' })
   language: string; // ISO 639-1 language code
 
   @Column({ nullable: true })

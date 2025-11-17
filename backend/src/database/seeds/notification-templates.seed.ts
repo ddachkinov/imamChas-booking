@@ -11,11 +11,11 @@ export async function seedNotificationTemplates(dataSource: DataSource): Promise
     {
       tenant_id: null,
       business_id: null,
-      name: 'Appointment Confirmation (Email)',
+      name: 'Потвърждение на среща (Имейл)',
       notification_type: NotificationType.APPOINTMENT_CONFIRMATION,
       channel: NotificationChannel.EMAIL,
-      language: 'en',
-      subject: 'Appointment Confirmed - {{business_name}}',
+      language: 'bg',
+      subject: 'Срещата е потвърдена - {{business_name}}',
       body_template: `
 <!DOCTYPE html>
 <html>
@@ -33,30 +33,30 @@ export async function seedNotificationTemplates(dataSource: DataSource): Promise
 <body>
   <div class="container">
     <div class="header">
-      <h1>Appointment Confirmed</h1>
+      <h1>Срещата е потвърдена</h1>
     </div>
     <div class="content">
-      <p>Hi {{client_name}},</p>
-      <p>Your appointment has been confirmed!</p>
+      <p>Здравейте {{client_name}},</p>
+      <p>Вашата среща е потвърдена!</p>
 
       <div class="details">
-        <h3>Appointment Details</h3>
-        <p><strong>Service:</strong> {{service_name}}</p>
-        <p><strong>Date & Time:</strong> {{appointment_datetime}}</p>
-        <p><strong>Duration:</strong> {{service_duration}} minutes</p>
-        <p><strong>With:</strong> {{staff_name}}</p>
-        <p><strong>Location:</strong> {{location_name}}<br>{{location_address}}</p>
+        <h3>Детайли на срещата</h3>
+        <p><strong>Услуга:</strong> {{service_name}}</p>
+        <p><strong>Дата и час:</strong> {{appointment_datetime}}</p>
+        <p><strong>Продължителност:</strong> {{service_duration}} минути</p>
+        <p><strong>Със:</strong> {{staff_name}}</p>
+        <p><strong>Локация:</strong> {{location_name}}<br>{{location_address}}</p>
       </div>
 
-      <p>We look forward to seeing you!</p>
+      <p>Очакваме ви с нетърпение!</p>
 
       <p style="text-align: center;">
-        <a href="{{booking_url}}" class="button">View Appointment</a>
+        <a href="{{booking_url}}" class="button">Преглед на срещата</a>
       </p>
     </div>
     <div class="footer">
-      <p>Need to make changes? <a href="{{manage_url}}">Manage your appointment</a></p>
-      <p>&copy; {{business_name}}. All rights reserved.</p>
+      <p>Нужда от промени? <a href="{{manage_url}}">Управление на срещата</a></p>
+      <p>&copy; {{business_name}}. Всички права запазени.</p>
     </div>
   </div>
 </body>
@@ -70,12 +70,12 @@ export async function seedNotificationTemplates(dataSource: DataSource): Promise
     {
       tenant_id: null,
       business_id: null,
-      name: 'Appointment Confirmation (SMS)',
+      name: 'Потвърждение на среща (SMS)',
       notification_type: NotificationType.APPOINTMENT_CONFIRMATION,
       channel: NotificationChannel.SMS,
-      language: 'en',
+      language: 'bg',
       subject: null,
-      body_template: '{{business_name}}: Appt confirmed for {{appointment_date}} at {{appointment_time}} with {{staff_name}}. Reply STOP to unsubscribe.',
+      body_template: '{{business_name}}: Среща потвърдена за {{appointment_date}} в {{appointment_time}} със {{staff_name}}.',
       is_system_template: true,
       is_active: true,
     },
@@ -84,11 +84,11 @@ export async function seedNotificationTemplates(dataSource: DataSource): Promise
     {
       tenant_id: null,
       business_id: null,
-      name: 'Appointment Reminder 24H (Email)',
+      name: 'Напомняне за среща 24ч (Имейл)',
       notification_type: NotificationType.APPOINTMENT_REMINDER_24H,
       channel: NotificationChannel.EMAIL,
-      language: 'en',
-      subject: 'Reminder: Appointment Tomorrow - {{business_name}}',
+      language: 'bg',
+      subject: 'Напомняне: Среща утре - {{business_name}}',
       body_template: `
 <!DOCTYPE html>
 <html>
@@ -106,29 +106,29 @@ export async function seedNotificationTemplates(dataSource: DataSource): Promise
 <body>
   <div class="container">
     <div class="header">
-      <h1>📅 Appointment Reminder</h1>
+      <h1>📅 Напомняне за среща</h1>
     </div>
     <div class="content">
-      <p>Hi {{client_name}},</p>
-      <p>This is a friendly reminder about your upcoming appointment tomorrow.</p>
+      <p>Здравейте {{client_name}},</p>
+      <p>Това е напомняне за вашата предстояща среща утре.</p>
 
       <div class="details">
-        <h3>Appointment Details</h3>
-        <p><strong>Service:</strong> {{service_name}}</p>
-        <p><strong>Date & Time:</strong> {{appointment_datetime}}</p>
-        <p><strong>With:</strong> {{staff_name}}</p>
-        <p><strong>Location:</strong> {{location_name}}</p>
+        <h3>Детайли на срещата</h3>
+        <p><strong>Услуга:</strong> {{service_name}}</p>
+        <p><strong>Дата и час:</strong> {{appointment_datetime}}</p>
+        <p><strong>Със:</strong> {{staff_name}}</p>
+        <p><strong>Локация:</strong> {{location_name}}</p>
       </div>
 
-      <p>Looking forward to seeing you!</p>
+      <p>Очакваме ви с нетърпение!</p>
 
       <p style="text-align: center;">
-        <a href="{{reschedule_url}}" class="button">Reschedule</a>
-        <a href="{{cancel_url}}" class="button" style="background-color: #EF4444;">Cancel</a>
+        <a href="{{reschedule_url}}" class="button">Пренасрочване</a>
+        <a href="{{cancel_url}}" class="button" style="background-color: #EF4444;">Отмяна</a>
       </p>
     </div>
     <div class="footer">
-      <p>&copy; {{business_name}}. All rights reserved.</p>
+      <p>&copy; {{business_name}}. Всички права запазени.</p>
     </div>
   </div>
 </body>
@@ -142,12 +142,12 @@ export async function seedNotificationTemplates(dataSource: DataSource): Promise
     {
       tenant_id: null,
       business_id: null,
-      name: 'Appointment Reminder 24H (SMS)',
+      name: 'Напомняне за среща 24ч (SMS)',
       notification_type: NotificationType.APPOINTMENT_REMINDER_24H,
       channel: NotificationChannel.SMS,
-      language: 'en',
+      language: 'bg',
       subject: null,
-      body_template: '{{business_name}}: Reminder - Appt tomorrow {{appointment_time}} with {{staff_name}} at {{location_name}}.',
+      body_template: '{{business_name}}: Напомняне - Среща утре в {{appointment_time}} със {{staff_name}} на {{location_name}}.',
       is_system_template: true,
       is_active: true,
     },
@@ -156,11 +156,11 @@ export async function seedNotificationTemplates(dataSource: DataSource): Promise
     {
       tenant_id: null,
       business_id: null,
-      name: 'Appointment Reminder 1H (Email)',
+      name: 'Напомняне за среща 1ч (Имейл)',
       notification_type: NotificationType.APPOINTMENT_REMINDER_1H,
       channel: NotificationChannel.EMAIL,
-      language: 'en',
-      subject: 'Starting Soon: Your Appointment in 1 Hour - {{business_name}}',
+      language: 'bg',
+      subject: 'Започва скоро: Вашата среща след 1 час - {{business_name}}',
       body_template: `
 <!DOCTYPE html>
 <html>
@@ -177,24 +177,24 @@ export async function seedNotificationTemplates(dataSource: DataSource): Promise
 <body>
   <div class="container">
     <div class="header">
-      <h1>⏰ Starting Soon!</h1>
+      <h1>⏰ Започва скоро!</h1>
     </div>
     <div class="content">
-      <p>Hi {{client_name}},</p>
-      <p>Your appointment starts in 1 hour.</p>
+      <p>Здравейте {{client_name}},</p>
+      <p>Вашата среща започва след 1 час.</p>
 
       <div class="details">
-        <h3>Appointment Details</h3>
-        <p><strong>Time:</strong> {{appointment_time}}</p>
-        <p><strong>Service:</strong> {{service_name}}</p>
-        <p><strong>With:</strong> {{staff_name}}</p>
-        <p><strong>Location:</strong> {{location_name}}<br>{{location_address}}</p>
+        <h3>Детайли на срещата</h3>
+        <p><strong>Час:</strong> {{appointment_time}}</p>
+        <p><strong>Услуга:</strong> {{service_name}}</p>
+        <p><strong>Със:</strong> {{staff_name}}</p>
+        <p><strong>Локация:</strong> {{location_name}}<br>{{location_address}}</p>
       </div>
 
-      <p>See you soon!</p>
+      <p>До скоро!</p>
     </div>
     <div class="footer">
-      <p>&copy; {{business_name}}. All rights reserved.</p>
+      <p>&copy; {{business_name}}. Всички права запазени.</p>
     </div>
   </div>
 </body>
@@ -208,12 +208,12 @@ export async function seedNotificationTemplates(dataSource: DataSource): Promise
     {
       tenant_id: null,
       business_id: null,
-      name: 'Appointment Reminder 1H (SMS)',
+      name: 'Напомняне за среща 1ч (SMS)',
       notification_type: NotificationType.APPOINTMENT_REMINDER_1H,
       channel: NotificationChannel.SMS,
-      language: 'en',
+      language: 'bg',
       subject: null,
-      body_template: '{{business_name}}: Your appt starts in 1 hour ({{appointment_time}}) with {{staff_name}}. See you soon!',
+      body_template: '{{business_name}}: Вашата среща започва след 1 час ({{appointment_time}}) със {{staff_name}}. До скоро!',
       is_system_template: true,
       is_active: true,
     },
@@ -222,11 +222,11 @@ export async function seedNotificationTemplates(dataSource: DataSource): Promise
     {
       tenant_id: null,
       business_id: null,
-      name: 'Appointment Cancelled (Email)',
+      name: 'Отменена среща (Имейл)',
       notification_type: NotificationType.APPOINTMENT_CANCELLED,
       channel: NotificationChannel.EMAIL,
-      language: 'en',
-      subject: 'Appointment Cancelled - {{business_name}}',
+      language: 'bg',
+      subject: 'Срещата е отменена - {{business_name}}',
       body_template: `
 <!DOCTYPE html>
 <html>
@@ -244,30 +244,30 @@ export async function seedNotificationTemplates(dataSource: DataSource): Promise
 <body>
   <div class="container">
     <div class="header">
-      <h1>Appointment Cancelled</h1>
+      <h1>Срещата е отменена</h1>
     </div>
     <div class="content">
-      <p>Hi {{client_name}},</p>
-      <p>Your appointment has been cancelled.</p>
+      <p>Здравейте {{client_name}},</p>
+      <p>Вашата среща е отменена.</p>
 
       <div class="details">
-        <h3>Cancelled Appointment</h3>
-        <p><strong>Service:</strong> {{service_name}}</p>
-        <p><strong>Was scheduled for:</strong> {{appointment_datetime}}</p>
-        <p><strong>With:</strong> {{staff_name}}</p>
+        <h3>Отменена среща</h3>
+        <p><strong>Услуга:</strong> {{service_name}}</p>
+        <p><strong>Беше планирана за:</strong> {{appointment_datetime}}</p>
+        <p><strong>Със:</strong> {{staff_name}}</p>
         {{#if cancellation_reason}}
-        <p><strong>Reason:</strong> {{cancellation_reason}}</p>
+        <p><strong>Причина:</strong> {{cancellation_reason}}</p>
         {{/if}}
       </div>
 
-      <p>We hope to see you again soon!</p>
+      <p>Надяваме се скоро да ви видим отново!</p>
 
       <p style="text-align: center;">
-        <a href="{{book_again_url}}" class="button">Book Another Appointment</a>
+        <a href="{{book_again_url}}" class="button">Резервирайте друга среща</a>
       </p>
     </div>
     <div class="footer">
-      <p>&copy; {{business_name}}. All rights reserved.</p>
+      <p>&copy; {{business_name}}. Всички права запазени.</p>
     </div>
   </div>
 </body>
@@ -281,11 +281,11 @@ export async function seedNotificationTemplates(dataSource: DataSource): Promise
     {
       tenant_id: null,
       business_id: null,
-      name: 'Password Reset (Email)',
+      name: 'Нулиране на парола (Имейл)',
       notification_type: NotificationType.PASSWORD_RESET,
       channel: NotificationChannel.EMAIL,
-      language: 'en',
-      subject: 'Reset Your Password',
+      language: 'bg',
+      subject: 'Нулиране на вашата парола',
       body_template: `
 <!DOCTYPE html>
 <html>
@@ -302,21 +302,21 @@ export async function seedNotificationTemplates(dataSource: DataSource): Promise
 <body>
   <div class="container">
     <div class="header">
-      <h1>🔒 Password Reset</h1>
+      <h1>🔒 Нулиране на парола</h1>
     </div>
     <div class="content">
-      <p>Hi {{client_name}},</p>
-      <p>We received a request to reset your password. Click the button below to create a new password:</p>
+      <p>Здравейте {{client_name}},</p>
+      <p>Получихме заявка за нулиране на вашата парола. Кликнете на бутона по-долу, за да създадете нова парола:</p>
 
       <p style="text-align: center;">
-        <a href="{{reset_link}}" class="button">Reset Password</a>
+        <a href="{{reset_link}}" class="button">Нулирай паролата</a>
       </p>
 
-      <p>This link will expire in 1 hour.</p>
-      <p>If you didn't request a password reset, you can safely ignore this email.</p>
+      <p>Тази връзка ще изтече след 1 час.</p>
+      <p>Ако не сте заявили нулиране на парола, можете спокойно да игнорирате този имейл.</p>
     </div>
     <div class="footer">
-      <p>For security reasons, never share this email with anyone.</p>
+      <p>От съображения за сигурност, никога не споделяйте този имейл с никого.</p>
     </div>
   </div>
 </body>

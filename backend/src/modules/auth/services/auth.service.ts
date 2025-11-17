@@ -66,7 +66,7 @@ export class AuthService {
       first_name: registerDto.first_name,
       last_name: registerDto.last_name,
       phone_number: registerDto.phone_number,
-      language: registerDto.language || 'en',
+      language: registerDto.language || 'bg',
       timezone: registerDto.timezone || 'UTC',
       status: UserStatus.PENDING_VERIFICATION,
       email_verified: false,

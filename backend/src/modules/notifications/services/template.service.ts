@@ -26,7 +26,7 @@ export class TemplateService {
     notificationType: NotificationType,
     channel: NotificationChannel,
     businessId?: string,
-    language = 'en',
+    language = 'bg',
   ): Promise<NotificationTemplate> {
     // Try business-specific template first
     if (businessId) {

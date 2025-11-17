@@ -71,7 +71,7 @@ export class User {
   @Column({ default: false })
   phone_verified: boolean;
 
-  @Column({ default: 'en' })
+  @Column({ default: 'bg' })
   language: string;
 
   @Column({ default: 'UTC' })
