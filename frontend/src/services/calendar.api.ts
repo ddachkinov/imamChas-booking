@@ -35,23 +35,38 @@ export const calendarApi = {
     status?: string[];
   }): Promise<CalendarData> {
     const queryParams = new URLSearchParams({
-      business_id: params.businessId,
-      view: params.view,
-      start_date: params.startDate,
-      end_date: params.endDate,
+      view_type: params.view,
+      date: params.startDate,
     });
 
-    if (params.staffId) {
-      queryParams.append('staff_id', params.staffId);
+    // Add business_id if provided
+    if (params.businessId) {
+      queryParams.append('business_id', params.businessId);
     }
+
+    // Add end_date for resource view or multi-day views
+    if (params.view === 'resource' || params.endDate) {
+      queryParams.append('end_date', params.endDate);
+    }
+
+    // Add staff_member_ids as array parameter
+    if (params.staffId) {
+      queryParams.append('staff_member_ids', params.staffId);
+    }
+
+    // Add location_id if provided
     if (params.locationId) {
       queryParams.append('location_id', params.locationId);
     }
-    if (params.status && params.status.length > 0) {
-      params.status.forEach((s) => queryParams.append('status', s));
-    }
 
-    const response = await apiService.get<CalendarData>(`/calendar?${queryParams.toString()}`);
+    // Include blocked time by default
+    queryParams.append('include_blocked_time', 'true');
+    queryParams.append('include_availability', 'true');
+
+    // Note: status filtering happens on the backend via query parameters
+    // The backend will need to support status filtering if needed
+
+    const response = await apiService.get<CalendarData>(`/calendar/view?${queryParams.toString()}`);
     return response.data;
   },
 

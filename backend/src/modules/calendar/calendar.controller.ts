@@ -345,4 +345,28 @@ export class CalendarController {
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.send(content);
   }
+
+  /**
+   * Get calendar metrics for dashboard
+   */
+  @Get('metrics')
+  @ApiOperation({ summary: 'Get calendar metrics for specific date' })
+  @ApiResponse({
+    status: 200,
+    description: 'Calendar metrics retrieved',
+  })
+  async getCalendarMetrics(
+    @Request() req,
+    @Query('business_id') businessId: string,
+    @Query('date') date: string,
+    @Query('staff_id') staffId?: string,
+  ): Promise<any> {
+    const tenantId = req.user.tenantId;
+
+    return this.calendarService.getCalendarMetrics(
+      tenantId,
+      date,
+      staffId,
+    );
+  }
 }

@@ -7,10 +7,39 @@ import {
   IsInt,
   IsPositive,
   Min,
+  Max,
   MaxLength,
   IsUUID,
   IsUrl,
+  IsEnum,
+  Matches,
+  ValidationArguments,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+  Validate,
 } from 'class-validator';
+
+export enum ServiceCategory {
+  HAIRCUT = 'haircut',
+  COLORING = 'coloring',
+  STYLING = 'styling',
+  TREATMENT = 'treatment',
+  MASSAGE = 'massage',
+  FACIAL = 'facial',
+  CONSULTATION = 'consultation',
+  OTHER = 'other',
+}
+
+@ValidatorConstraint({ name: 'isDurationIncrement', async: false })
+export class IsDurationIncrementConstraint implements ValidatorConstraintInterface {
+  validate(duration: number, args: ValidationArguments) {
+    return duration % 15 === 0;
+  }
+
+  defaultMessage(args: ValidationArguments) {
+    return 'Duration must be in 15-minute increments';
+  }
+}
 
 export class CreateServiceDto {
   @ApiProperty()
@@ -27,27 +56,31 @@ export class CreateServiceDto {
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ enum: ServiceCategory })
   @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  category?: string;
+  @IsEnum(ServiceCategory)
+  category?: ServiceCategory;
 
   @ApiProperty()
   @IsInt()
   @IsPositive()
+  @Min(15, { message: 'Duration must be at least 15 minutes' })
+  @Max(480, { message: 'Duration cannot exceed 8 hours (480 minutes)' })
+  @Validate(IsDurationIncrementConstraint)
   duration_minutes: number;
 
   @ApiPropertyOptional({ default: 0 })
   @IsOptional()
   @IsInt()
   @Min(0)
+  @Max(120, { message: 'Buffer before cannot exceed 120 minutes' })
   buffer_before_minutes?: number;
 
   @ApiPropertyOptional({ default: 0 })
   @IsOptional()
   @IsInt()
   @Min(0)
+  @Max(120, { message: 'Buffer after cannot exceed 120 minutes' })
   buffer_after_minutes?: number;
 
   @ApiProperty()

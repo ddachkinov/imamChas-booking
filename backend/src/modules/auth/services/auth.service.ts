@@ -161,9 +161,16 @@ export class AuthService {
     });
     const businessId = staffMember?.business_id || null;
 
-    // Generate JWT tokens
+    // Generate JWT tokens with extended expiry if remember_me is enabled
     const permissions = await this.usersService.getUserPermissions(user.id);
-    return this.jwtService.generateTokenPair(user, tenant, user.userRoles || [], permissions, businessId);
+    return this.jwtService.generateTokenPair(
+      user,
+      tenant,
+      user.userRoles || [],
+      permissions,
+      loginDto.remember_me || false,
+      businessId,
+    );
   }
 
   /**
