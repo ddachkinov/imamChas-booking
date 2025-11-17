@@ -139,9 +139,15 @@ export class AuthService {
     // Update last login
     await this.usersService.updateLastLogin(user.id);
 
-    // Generate JWT tokens
+    // Generate JWT tokens with extended expiry if remember_me is enabled
     const permissions = await this.usersService.getUserPermissions(user.id);
-    return this.jwtService.generateTokenPair(user, tenant, user.userRoles || [], permissions);
+    return this.jwtService.generateTokenPair(
+      user,
+      tenant,
+      user.userRoles || [],
+      permissions,
+      loginDto.remember_me || false,
+    );
   }
 
   /**

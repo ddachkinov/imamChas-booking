@@ -31,9 +31,9 @@ export class ServicesController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all services' })
-  @ApiResponse({ status: 200, description: 'List of services' })
-  findAll(
+  @ApiOperation({ summary: 'Get all services with pagination' })
+  @ApiResponse({ status: 200, description: 'List of services with pagination' })
+  async findAll(
     @Request() req,
     @Query('businessId') businessId?: string,
     @Query('includeInactive') includeInactive?: string,
@@ -42,8 +42,24 @@ export class ServicesController {
     @Query('is_active') isActive?: string,
     @Query('min_price') minPrice?: string,
     @Query('max_price') maxPrice?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
   ) {
-    return this.servicesService.findAll(
+    const services = await this.servicesService.findAll(
+      req.user.tenant_id,
+      businessId,
+      includeInactive === 'true',
+      search,
+      category,
+      isActive !== undefined ? isActive === 'true' : undefined,
+      minPrice ? parseFloat(minPrice) : undefined,
+      maxPrice ? parseFloat(maxPrice) : undefined,
+      limit ? parseInt(limit) : undefined,
+      offset ? parseInt(offset) : undefined,
+    );
+
+    // Return paginated response
+    const total = await this.servicesService.count(
       req.user.tenant_id,
       businessId,
       includeInactive === 'true',
@@ -53,6 +69,15 @@ export class ServicesController {
       minPrice ? parseFloat(minPrice) : undefined,
       maxPrice ? parseFloat(maxPrice) : undefined,
     );
+
+    return {
+      data: services,
+      pagination: {
+        total,
+        limit: limit ? parseInt(limit) : total,
+        offset: offset ? parseInt(offset) : 0,
+      },
+    };
   }
 
   @Get(':id')

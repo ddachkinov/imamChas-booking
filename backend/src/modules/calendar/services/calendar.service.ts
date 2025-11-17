@@ -80,9 +80,21 @@ export class CalendarService {
     const date = dayjs(dto.date).tz(tz);
 
     // Get staff member (use first from filter or find default)
-    const staffId = dto.staff_member_ids?.[0];
+    let staffId = dto.staff_member_ids?.[0];
+
+    // If no staff member specified, get the first active staff member
     if (!staffId) {
-      throw new Error('Staff member ID required for day view');
+      const firstStaff = await this.staffMemberRepository.findOne({
+        where: { tenant_id: tenantId, is_active: true },
+        relations: ['user'],
+        order: { created_at: 'ASC' },
+      });
+
+      if (!firstStaff) {
+        throw new NotFoundException('No staff members found');
+      }
+
+      staffId = firstStaff.id;
     }
 
     const staff = await this.staffMemberRepository.findOne({
@@ -579,5 +591,68 @@ export class CalendarService {
     };
 
     return colorMap[status] || '#3B82F6';
+  }
+
+  /**
+   * Get calendar metrics for a specific date
+   */
+  async getCalendarMetrics(
+    tenantId: string,
+    date: string,
+    staffId?: string,
+  ): Promise<any> {
+    const startOfDay = dayjs(date).startOf('day').toDate();
+    const endOfDay = dayjs(date).endOf('day').toDate();
+
+    // Build query conditions
+    const whereConditions: any = {
+      tenant_id: tenantId,
+      start_time: Between(startOfDay, endOfDay),
+    };
+
+    if (staffId) {
+      whereConditions.staff_member_id = staffId;
+    }
+
+    // Get all appointments for the day
+    const appointments = await this.appointmentRepository.find({
+      where: whereConditions,
+      relations: ['service'],
+    });
+
+    // Calculate metrics
+    const totalAppointments = appointments.length;
+    const confirmedAppointments = appointments.filter(
+      (apt) => apt.status === AppointmentStatus.CONFIRMED || apt.status === AppointmentStatus.CHECKED_IN,
+    ).length;
+    const completedAppointments = appointments.filter(
+      (apt) => apt.status === AppointmentStatus.COMPLETED,
+    ).length;
+    const cancelledAppointments = appointments.filter(
+      (apt) => apt.status === AppointmentStatus.CANCELLED || apt.status === AppointmentStatus.NO_SHOW,
+    ).length;
+
+    // Calculate revenue
+    const totalRevenue = appointments.reduce((sum, apt) => {
+      if (apt.price) {
+        return sum + parseFloat(apt.price.toString());
+      }
+      return sum;
+    }, 0);
+
+    // Calculate completion rate
+    const completionRate = totalAppointments > 0
+      ? (completedAppointments / totalAppointments) * 100
+      : 0;
+
+    return {
+      date,
+      total_appointments: totalAppointments,
+      confirmed: confirmedAppointments,
+      completed: completedAppointments,
+      cancelled: cancelledAppointments,
+      total_revenue: totalRevenue,
+      completion_rate: Math.round(completionRate * 10) / 10,
+    };
   }
 }
