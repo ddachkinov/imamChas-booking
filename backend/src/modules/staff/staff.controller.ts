@@ -31,10 +31,37 @@ export class StaffController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all staff members' })
-  @ApiResponse({ status: 200, description: 'List of staff members' })
-  findAll(@Request() req, @Query('businessId') businessId?: string, @Query('includeInactive') includeInactive?: string) {
-    return this.staffService.findAll(req.user.tenant_id, businessId, includeInactive === 'true');
+  @ApiOperation({ summary: 'Get all staff members with pagination' })
+  @ApiResponse({ status: 200, description: 'List of staff members with pagination' })
+  async findAll(
+    @Request() req,
+    @Query('businessId') businessId?: string,
+    @Query('includeInactive') includeInactive?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
+    const staff = await this.staffService.findAll(
+      req.user.tenant_id,
+      businessId,
+      includeInactive === 'true',
+      limit ? parseInt(limit) : undefined,
+      offset ? parseInt(offset) : undefined,
+    );
+
+    const total = await this.staffService.count(
+      req.user.tenant_id,
+      businessId,
+      includeInactive === 'true',
+    );
+
+    return {
+      data: staff,
+      pagination: {
+        total,
+        limit: limit ? parseInt(limit) : total,
+        offset: offset ? parseInt(offset) : 0,
+      },
+    };
   }
 
   @Get(':id')

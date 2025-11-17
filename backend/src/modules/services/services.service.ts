@@ -43,7 +43,67 @@ export class ServicesService {
     isActive?: boolean,
     minPrice?: number,
     maxPrice?: number,
+    limit?: number,
+    offset?: number,
   ): Promise<Service[]> {
+    const query = this.buildServiceQuery(
+      tenantId,
+      businessId,
+      includeInactive,
+      search,
+      category,
+      isActive,
+      minPrice,
+      maxPrice,
+    );
+
+    query.orderBy('service.sort_order', 'ASC').addOrderBy('service.name', 'ASC');
+
+    if (limit !== undefined) {
+      query.limit(limit);
+    }
+
+    if (offset !== undefined) {
+      query.offset(offset);
+    }
+
+    return query.getMany();
+  }
+
+  async count(
+    tenantId: string,
+    businessId?: string,
+    includeInactive: boolean = false,
+    search?: string,
+    category?: string,
+    isActive?: boolean,
+    minPrice?: number,
+    maxPrice?: number,
+  ): Promise<number> {
+    const query = this.buildServiceQuery(
+      tenantId,
+      businessId,
+      includeInactive,
+      search,
+      category,
+      isActive,
+      minPrice,
+      maxPrice,
+    );
+
+    return query.getCount();
+  }
+
+  private buildServiceQuery(
+    tenantId: string,
+    businessId?: string,
+    includeInactive: boolean = false,
+    search?: string,
+    category?: string,
+    isActive?: boolean,
+    minPrice?: number,
+    maxPrice?: number,
+  ) {
     const query = this.serviceRepository
       .createQueryBuilder('service')
       .where('service.tenant_id = :tenantId', { tenantId });
@@ -78,9 +138,7 @@ export class ServicesService {
       query.andWhere('service.price <= :maxPrice', { maxPrice });
     }
 
-    query.orderBy('service.sort_order', 'ASC').addOrderBy('service.name', 'ASC');
-
-    return query.getMany();
+    return query;
   }
 
   async findOne(tenantId: string, id: string): Promise<Service> {
