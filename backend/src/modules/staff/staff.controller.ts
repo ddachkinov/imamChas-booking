@@ -58,4 +58,11 @@ export class StaffController {
     await this.staffService.remove(req.user.tenant_id, id);
     return { message: 'Staff member deleted successfully' };
   }
+
+  @Post('invite')
+  @ApiOperation({ summary: 'Invite new staff member' })
+  @ApiResponse({ status: 201, description: 'Staff invitation sent' })
+  async invite(@Request() req, @Body() inviteDto: any) {
+    return this.staffService.inviteStaffMember(req.user.tenant_id, req.user.userId, inviteDto);
+  }
 }

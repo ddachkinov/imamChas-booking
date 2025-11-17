@@ -117,19 +117,19 @@ export const serviceApi = {
 export const staffApi = {
   getStaffMembers: (businessId: string, filters?: StaffFilters) => {
     const params = new URLSearchParams();
+    params.append('businessId', businessId);
     if (filters?.role) params.append('role', filters.role);
     if (filters?.status) params.append('status', filters.status);
     if (filters?.location_id) params.append('location_id', filters.location_id);
 
-    const query = params.toString();
-    return apiService.get<StaffMember[]>(`/businesses/${businessId}/staff${query ? `?${query}` : ''}`);
+    return apiService.get<StaffMember[]>(`/staff?${params.toString()}`);
   },
 
   getStaffMember: (staffId: string) =>
     apiService.get<StaffMember>(`/staff/${staffId}`),
 
   inviteStaff: (businessId: string, data: StaffInvitation) =>
-    apiService.post<{ invitation_id: string }>(`/businesses/${businessId}/staff/invite`, data),
+    apiService.post<{ invitation_id: string }>(`/staff/invite`, { ...data, business_id: businessId }),
 
   updateStaff: (staffId: string, data: Partial<StaffMember>) =>
     apiService.put<StaffMember>(`/staff/${staffId}`, data),
