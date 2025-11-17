@@ -6,7 +6,6 @@ import { UserRole } from '../../modules/users/entities/user-role.entity';
 import { Business } from '../../modules/businesses/entities/business.entity';
 import { StaffMember, StaffStatus } from '../../modules/staff/entities/staff-member.entity';
 import { Service } from '../../modules/services/entities/service.entity';
-import { ServiceStaff } from '../../modules/services/entities/service-staff.entity';
 import * as argon2 from 'argon2';
 
 async function addServices() {
@@ -23,7 +22,6 @@ async function addServices() {
     const businessRepo = AppDataSource.getRepository(Business);
     const staffMemberRepo = AppDataSource.getRepository(StaffMember);
     const serviceRepo = AppDataSource.getRepository(Service);
-    const serviceStaffRepo = AppDataSource.getRepository(ServiceStaff);
 
     // Get existing tenant
     console.log('📝 Finding existing tenant...');
@@ -207,33 +205,7 @@ async function addServices() {
     });
 
     console.log('✅ Created 5 services');
-
-    console.log('📝 Assigning services to staff members...');
-
-    // Admin staff can do all services
-    await serviceStaffRepo.save([
-      { service_id: service1.id, staff_member_id: adminStaffMember.id },
-      { service_id: service2.id, staff_member_id: adminStaffMember.id },
-      { service_id: service3.id, staff_member_id: adminStaffMember.id },
-      { service_id: service4.id, staff_member_id: adminStaffMember.id },
-      { service_id: service5.id, staff_member_id: adminStaffMember.id },
-    ]);
-
-    // Sarah specializes in deep tissue, hot stone, and couples
-    await serviceStaffRepo.save([
-      { service_id: service1.id, staff_member_id: staffMember1.id },
-      { service_id: service3.id, staff_member_id: staffMember1.id },
-      { service_id: service5.id, staff_member_id: staffMember1.id },
-    ]);
-
-    // Michael specializes in Swedish, aromatherapy, and couples
-    await serviceStaffRepo.save([
-      { service_id: service2.id, staff_member_id: staffMember2.id },
-      { service_id: service4.id, staff_member_id: staffMember2.id },
-      { service_id: service5.id, staff_member_id: staffMember2.id },
-    ]);
-
-    console.log('✅ Assigned services to staff members');
+    console.log('ℹ️  Note: Staff-service assignments should be configured via the admin UI or staff_skills table');
 
     console.log('');
     console.log('✅ ================================');
