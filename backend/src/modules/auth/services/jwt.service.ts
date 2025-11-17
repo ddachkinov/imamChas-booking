@@ -20,7 +20,7 @@ export class JwtService {
     @Inject('REDIS_CLIENT') private readonly redisClient: Redis,
   ) {
     this.accessTokenExpiry = this.configService.get<number>('JWT_ACCESS_TOKEN_EXPIRY', 3600); // 1 hour
-    this.refreshTokenExpiry = this.configService.get<number>('JWT_REFRESH_TOKEN_EXPIRY', 2592000); // 30 days
+    this.refreshTokenExpiry = this.configService.get<number>('JWT_REFRESH_TOKEN_EXPIRY', 604800); // 7 days (default)
     this.issuer = this.configService.get<string>('JWT_ISSUER', 'booking-platform');
     this.audience = this.configService.get<string>('JWT_AUDIENCE', 'booking-platform-api');
   }
@@ -65,15 +65,18 @@ export class JwtService {
   /**
    * Generate refresh token
    */
-  async generateRefreshToken(user: User, tenant: Tenant): Promise<string> {
+  async generateRefreshToken(user: User, tenant: Tenant, rememberMe: boolean = false): Promise<string> {
     const tokenId = uuidv4();
+
+    // Extended expiry for "Remember Me" (30 days), otherwise 7 days
+    const expirySeconds = rememberMe ? 2592000 : this.refreshTokenExpiry;
 
     const payload = {
       user_id: user.id,
       tenant_id: tenant.id,
       type: 'refresh',
       iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + this.refreshTokenExpiry,
+      exp: Math.floor(Date.now() / 1000) + expirySeconds,
       jti: tokenId,
     };
 
@@ -87,7 +90,7 @@ export class JwtService {
     });
 
     // Store refresh token in Redis with expiry
-    await this.storeRefreshToken(user.id, tokenId, this.refreshTokenExpiry);
+    await this.storeRefreshToken(user.id, tokenId, expirySeconds);
 
     return refreshToken;
   }
@@ -195,10 +198,11 @@ export class JwtService {
     tenant: Tenant,
     roles: any[] = [],
     permissions: string[] = [],
+    rememberMe: boolean = false,
   ): Promise<AuthResponse> {
     const [accessToken, refreshToken] = await Promise.all([
       this.generateAccessToken(user, tenant, roles, permissions),
-      this.generateRefreshToken(user, tenant),
+      this.generateRefreshToken(user, tenant, rememberMe),
     ]);
 
     return {
