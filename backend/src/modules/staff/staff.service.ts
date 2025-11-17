@@ -4,9 +4,9 @@ import { Repository, MoreThanOrEqual } from 'typeorm';
 import { StaffMember, StaffStatus } from './entities/staff-member.entity';
 import { CreateStaffMemberDto } from './dto/create-staff-member.dto';
 import { UpdateStaffMemberDto } from './dto/update-staff-member.dto';
-import { User, UserStatus } from '../users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
 import { Appointment, AppointmentStatus } from '../appointments/entities/appointment.entity';
-import * as bcrypt from 'bcrypt';
+import * as argon2 from 'argon2';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -174,7 +174,7 @@ export class StaffService {
 
     // Generate a temporary password or invitation token
     const temporaryPassword = uuidv4().substring(0, 12);
-    const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
+    const hashedPassword = await argon2.hash(temporaryPassword);
 
     // Create or use existing user
     let user: User;
@@ -187,7 +187,7 @@ export class StaffService {
         first_name: email.split('@')[0], // Temporary first name
         last_name: '', // Will be set when they accept invitation
         tenant_id: tenantId,
-        status: UserStatus.PENDING,
+        is_active: false, // Will be activated when they accept invitation
         email_verified: false,
       });
       user = await this.userRepository.save(user);
@@ -199,13 +199,7 @@ export class StaffService {
       tenant_id: tenantId,
       business_id,
       status: StaffStatus.ACTIVE,
-      metadata: {
-        invited_by: invitedByUserId,
-        invited_at: new Date().toISOString(),
-        role,
-        service_ids: service_ids || [],
-        location_ids: location_ids || [],
-      },
+      // TODO: Store invitation details (invited_by, role, service_ids, location_ids) when metadata field is added
     });
 
     await this.staffRepository.save(staffMember);
