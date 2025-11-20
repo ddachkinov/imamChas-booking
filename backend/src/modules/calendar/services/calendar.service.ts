@@ -307,8 +307,8 @@ export class CalendarService {
       appointmentCounts[dateKey] = (appointmentCounts[dateKey] || 0) + 1;
 
       // Assume price is stored in appointment or service
-      if (apt.price) {
-        totalRevenue += parseFloat(apt.price.toString());
+      if (apt.price !== null && apt.price !== undefined) {
+        totalRevenue += parseFloat(apt.price.toString()) || 0;
       }
     }
 
@@ -338,9 +338,11 @@ export class CalendarService {
     }
 
     const summary: MonthSummary = {
-      total_appointments: appointments.length,
-      total_revenue: totalRevenue,
-      average_per_day: appointments.length / lastDayOfMonth.date(),
+      total_appointments: appointments.length || 0,
+      total_revenue: parseFloat((totalRevenue || 0).toFixed(2)),
+      average_per_day: appointments.length > 0
+        ? parseFloat((appointments.length / lastDayOfMonth.date()).toFixed(2))
+        : 0,
     };
 
     return {
@@ -654,8 +656,9 @@ export class CalendarService {
 
     // Calculate revenue
     const totalRevenue = appointments.reduce((sum, apt) => {
-      if (apt.price) {
-        return sum + parseFloat(apt.price.toString());
+      if (apt.price !== null && apt.price !== undefined) {
+        const price = parseFloat(apt.price.toString());
+        return sum + (isNaN(price) ? 0 : price);
       }
       return sum;
     }, 0);
@@ -667,12 +670,12 @@ export class CalendarService {
 
     return {
       date,
-      total_appointments: totalAppointments,
-      confirmed: confirmedAppointments,
-      completed: completedAppointments,
-      cancelled: cancelledAppointments,
-      total_revenue: totalRevenue,
-      completion_rate: Math.round(completionRate * 10) / 10,
+      total_appointments: totalAppointments || 0,
+      confirmed: confirmedAppointments || 0,
+      completed: completedAppointments || 0,
+      cancelled: cancelledAppointments || 0,
+      total_revenue: parseFloat((totalRevenue || 0).toFixed(2)),
+      completion_rate: parseFloat((Math.round(completionRate * 10) / 10).toFixed(1)),
     };
   }
 }

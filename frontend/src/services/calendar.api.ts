@@ -35,8 +35,8 @@ export const calendarApi = {
     status?: string[];
   }): Promise<CalendarData> {
     const queryParams = new URLSearchParams({
-      view_type: params.view,
-      date: params.startDate,
+      view: params.view,
+      start_date: params.startDate,
     });
 
     // Add business_id if provided

@@ -57,7 +57,7 @@ export class ServicesService {
       maxPrice,
     );
 
-    query.orderBy('service.sort_order', 'ASC').addOrderBy('service.name', 'ASC');
+    query.orderBy('service.name', 'ASC');
 
     if (limit !== undefined) {
       query.limit(limit);

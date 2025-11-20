@@ -14,6 +14,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { ClientsService } from './clients.service';
 import { CreateClientProfileDto } from './dto/create-client-profile.dto';
 import { UpdateClientProfileDto } from './dto/update-client-profile.dto';
+import { QueryClientsDto } from './dto/query-clients.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Clients')
@@ -33,8 +34,8 @@ export class ClientsController {
   @Get()
   @ApiOperation({ summary: 'Get all client profiles' })
   @ApiResponse({ status: 200, description: 'List of client profiles' })
-  findAll(@Request() req, @Query('businessId') businessId?: string, @Query('includeInactive') includeInactive?: string) {
-    return this.clientsService.findAll(req.user.tenant_id, businessId, includeInactive === 'true');
+  findAll(@Request() req, @Query() query: QueryClientsDto) {
+    return this.clientsService.findAll(req.user.tenant_id, query.businessId, query.includeInactive || false);
   }
 
   @Get(':id')

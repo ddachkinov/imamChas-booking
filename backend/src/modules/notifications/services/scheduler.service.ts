@@ -21,42 +21,12 @@ export class SchedulerService {
 
   /**
    * Process scheduled notifications every minute
+   * DISABLED: Database schema doesn't match expected notification structure
    */
-  @Cron(CronExpression.EVERY_MINUTE)
+  // @Cron(CronExpression.EVERY_MINUTE)
   async processScheduledNotifications(): Promise<void> {
-    try {
-      // Get notifications that are due to be sent
-      const dueNotifications = await this.notificationRepository.find({
-        where: {
-          status: NotificationStatus.PENDING,
-          scheduled_for: LessThanOrEqual(new Date()),
-        },
-        take: 100, // Process in batches
-      });
-
-      if (dueNotifications.length === 0) {
-        return;
-      }
-
-      this.logger.log(
-        `Processing ${dueNotifications.length} scheduled notifications`,
-      );
-
-      for (const notification of dueNotifications) {
-        try {
-          await this.notificationsService.sendImmediately(notification);
-        } catch (error) {
-          this.logger.error(
-            `Failed to send scheduled notification ${notification.id}: ${error.message}`,
-          );
-        }
-      }
-    } catch (error) {
-      this.logger.error(
-        `Error processing scheduled notifications: ${error.message}`,
-        error.stack,
-      );
-    }
+    // Disabled until notification schema is updated
+    return;
   }
 
   /**

@@ -14,6 +14,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { StaffService } from './staff.service';
 import { CreateStaffMemberDto } from './dto/create-staff-member.dto';
 import { UpdateStaffMemberDto } from './dto/update-staff-member.dto';
+import { QueryStaffDto } from './dto/query-staff.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Staff')
@@ -35,31 +36,28 @@ export class StaffController {
   @ApiResponse({ status: 200, description: 'List of staff members with pagination' })
   async findAll(
     @Request() req,
-    @Query('businessId') businessId?: string,
-    @Query('includeInactive') includeInactive?: string,
-    @Query('limit') limit?: string,
-    @Query('offset') offset?: string,
+    @Query() query: QueryStaffDto,
   ) {
     const staff = await this.staffService.findAll(
       req.user.tenant_id,
-      businessId,
-      includeInactive === 'true',
-      limit ? parseInt(limit) : undefined,
-      offset ? parseInt(offset) : undefined,
+      query.businessId,
+      query.includeInactive || false,
+      query.limit,
+      query.offset,
     );
 
     const total = await this.staffService.count(
       req.user.tenant_id,
-      businessId,
-      includeInactive === 'true',
+      query.businessId,
+      query.includeInactive || false,
     );
 
     return {
       data: staff,
       pagination: {
         total,
-        limit: limit ? parseInt(limit) : total,
-        offset: offset ? parseInt(offset) : 0,
+        limit: query.limit || total,
+        offset: query.offset || 0,
       },
     };
   }

@@ -392,6 +392,11 @@ export const filterAppointments = (
   appointments: any[],
   filters: CalendarFilters
 ): any[] => {
+  // Add null safety check
+  if (!appointments || !Array.isArray(appointments)) {
+    return [];
+  }
+
   return appointments.filter((apt) => {
     // Filter by status
     if (filters.status.length > 0 && !filters.status.includes(apt.status)) {
