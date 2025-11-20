@@ -17,6 +17,11 @@ const LoginPage = lazy(() => import('@/pages/auth/LoginPage').then(m => ({ defau
 // Lazy-loaded landing page
 const LandingPage = lazy(() => import('@/pages/LandingPage').then(m => ({ default: m.LandingPage })));
 
+// Public pages (Studio24-inspired redesign)
+const PublicHomePage = lazy(() => import('@/pages/public/PublicHomePage').then(m => ({ default: m.PublicHomePage })));
+const StudioProfilePage = lazy(() => import('@/pages/public/StudioProfilePage').then(m => ({ default: m.StudioProfilePage })));
+const PublicBookingWizard = lazy(() => import('@/pages/public/PublicBookingWizard').then(m => ({ default: m.PublicBookingWizard })));
+
 // Loading fallback component
 const PageLoader = () => (
   <div className="flex items-center justify-center h-screen">
@@ -44,12 +49,32 @@ function App() {
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            {/* Landing page */}
+            {/* New Public Homepage (Studio24-inspired) */}
             <Route
               path="/"
               element={
                 <Suspense fallback={<PageLoader />}>
-                  <LandingPage />
+                  <PublicHomePage />
+                </Suspense>
+              }
+            />
+
+            {/* Studio Profile Page */}
+            <Route
+              path="/studios/:slug"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <StudioProfilePage />
+                </Suspense>
+              }
+            />
+
+            {/* Public Booking Wizard */}
+            <Route
+              path="/studios/:slug/booking"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <PublicBookingWizard />
                 </Suspense>
               }
             />
@@ -67,7 +92,15 @@ function App() {
             {/* Admin routes */}
             <Route path="/admin/*" element={<AdminRoutes />} />
 
-            {/* Public booking routes */}
+            {/* Legacy routes (keep for backward compatibility) */}
+            <Route
+              path="/old-landing"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <LandingPage />
+                </Suspense>
+              }
+            />
             <Route
               path="/book/:businessId"
               element={
