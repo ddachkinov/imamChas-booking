@@ -36,8 +36,8 @@ const AppointmentListContent: React.FC = () => {
     staleTime: 30000,
   });
 
-  // Filter appointments
-  const filteredAppointments = calendarData
+  // Filter appointments with null safety
+  const filteredAppointments = calendarData?.appointments
     ? filterAppointments(calendarData.appointments, state.filters)
     : [];
 

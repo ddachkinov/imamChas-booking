@@ -14,6 +14,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { ServicesService } from './services.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
+import { QueryServicesDto } from './dto/query-services.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Services')
@@ -35,47 +36,39 @@ export class ServicesController {
   @ApiResponse({ status: 200, description: 'List of services with pagination' })
   async findAll(
     @Request() req,
-    @Query('businessId') businessId?: string,
-    @Query('includeInactive') includeInactive?: string,
-    @Query('search') search?: string,
-    @Query('category') category?: string,
-    @Query('is_active') isActive?: string,
-    @Query('min_price') minPrice?: string,
-    @Query('max_price') maxPrice?: string,
-    @Query('limit') limit?: string,
-    @Query('offset') offset?: string,
+    @Query() query: QueryServicesDto,
   ) {
     const services = await this.servicesService.findAll(
       req.user.tenant_id,
-      businessId,
-      includeInactive === 'true',
-      search,
-      category,
-      isActive !== undefined ? isActive === 'true' : undefined,
-      minPrice ? parseFloat(minPrice) : undefined,
-      maxPrice ? parseFloat(maxPrice) : undefined,
-      limit ? parseInt(limit) : undefined,
-      offset ? parseInt(offset) : undefined,
+      query.businessId,
+      query.includeInactive || false,
+      query.search,
+      query.category,
+      query.is_active,
+      query.min_price,
+      query.max_price,
+      query.limit,
+      query.offset,
     );
 
     // Return paginated response
     const total = await this.servicesService.count(
       req.user.tenant_id,
-      businessId,
-      includeInactive === 'true',
-      search,
-      category,
-      isActive !== undefined ? isActive === 'true' : undefined,
-      minPrice ? parseFloat(minPrice) : undefined,
-      maxPrice ? parseFloat(maxPrice) : undefined,
+      query.businessId,
+      query.includeInactive || false,
+      query.search,
+      query.category,
+      query.is_active,
+      query.min_price,
+      query.max_price,
     );
 
     return {
       data: services,
       pagination: {
         total,
-        limit: limit ? parseInt(limit) : total,
-        offset: offset ? parseInt(offset) : 0,
+        limit: query.limit || total,
+        offset: query.offset || 0,
       },
     };
   }
